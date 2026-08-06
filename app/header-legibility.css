@@ -1,0 +1,16 @@
+/* Stronger presentation hierarchy for section and card headings. */
+.engine h3{font-size:36px!important;line-height:1.08!important}
+.math-stack strong{font-size:44px!important}
+.risk-title>b{font-size:28px!important;line-height:1.15!important}
+.decision-list h3{font-size:24px!important;line-height:1.2!important}
+.force-grid article>b{font-size:28px!important;line-height:1.15!important}
+.difference-hero h4{font-size:32px!important;line-height:1.08!important}
+.difference-grid h4{font-size:25px!important;line-height:1.14!important}
+.moat-selector b{font-size:22px!important;line-height:1.15!important}
+.moat-stage-head h4{font-size:36px!important;line-height:1.08!important}
+.priority-summary h4{font-size:28px!important;line-height:1.1!important}
+.priority-evidence-list>article.open .priority-summary h4{font-size:36px!important}
+.risk-summary h4{font-size:26px!important;line-height:1.15!important}
+.deep-risk-grid h4{font-size:24px!important;line-height:1.15!important}
+.drawer-head h2{font-size:42px!important;line-height:1.04!important}
+@media(max-width:620px){.engine h3{font-size:31px!important}.difference-hero h4{font-size:27px!important}.difference-grid h4,.risk-summary h4{font-size:22px!important}.priority-summary h4{font-size:25px!important}.drawer-head h2{font-size:34px!important}}

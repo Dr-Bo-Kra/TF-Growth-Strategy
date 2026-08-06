@@ -8,6 +8,7 @@ import "./moat-evidence.css";
 import "./budget-different.css";
 import "./serial-legibility.css";
 import "./body-legibility.css";
+import "./header-legibility.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 
