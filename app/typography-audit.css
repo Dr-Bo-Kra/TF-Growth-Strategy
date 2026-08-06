@@ -1,0 +1,27 @@
+/* Consolidated boardroom legibility pass across every page, tab and expansion. */
+.confidential,.header-actions>button,.jump{font-size:11px!important}
+.rail a,.kicker,.chapter-label p{font-size:12px!important}
+.signal-row span,.ns-top,.north-star>p,.ns-rule span,.margin span{font-size:11px!important}
+.bars button span,.year>b,.year>small,.legend,.math-stack small{font-size:11px!important}
+.data-note,.market-note,.difference-source,.drawer-source{font-size:10px!important;line-height:1.5!important}
+.engine>div>span{font-size:12px!important}.engine dt{font-size:11px!important}.engine dd,.engine dd .drill{font-size:13px!important}
+.flywheel{font-size:11px!important}
+.growth-entry span,.growth-entry i{font-size:11px!important}
+.scenario-tabs button,.scenario-lead span,.scenario-note b,.pricing>span{font-size:11px!important}
+.scenario-lead p,.pricing small,.scenario-stat small{font-size:11px!important}
+.risk-title small,.risk-register p,.synergy-strip>div small,.synergy-strip>span{font-size:11px!important}
+.risk-register article b,.synergy-strip>span b,.close b{font-size:12px!important}
+.risk-register em,.deep-risk-grid em,.risk-summary em{font-size:10px!important}
+.decision-list article>b{font-size:11px!important}
+.growth-head small,.growth-title>small{font-size:12px!important;line-height:1.25!important}
+.timing-strip b{font-size:11px!important}
+.market-hero>div span{font-size:11px!important}
+.moat-proof,.priority-summary>b{font-size:11px!important}
+.moat-stage-head small,.moat-stage-grid small,.priority-detail small,.risk-response small{font-size:12px!important}
+.difference-hero small,.difference-bottom small{font-size:12px!important}
+.difference-hero>p{font-size:12px!important;line-height:1.55!important}
+.source-trigger{font-size:11px!important}.source-window>div small,.source-window dt,.source-window em{font-size:10px!important}.source-window dd{font-size:11px!important}
+.drawer-head small,.drawer-callout small,.drawer-action small{font-size:11px!important}
+.drawer-rows span{font-size:11px!important}.drawer-rows b{font-size:17px!important}
+.growth-foot,.growth-foot button{font-size:10px!important}
+@media(max-width:620px){.rail a,.kicker,.chapter-label p{font-size:11px!important}.growth-head small,.growth-title>small{font-size:11px!important}.scenario-tabs button{font-size:10px!important}}
