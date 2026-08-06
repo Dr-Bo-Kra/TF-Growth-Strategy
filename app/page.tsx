@@ -11,6 +11,7 @@ import "./body-legibility.css";
 import "./header-legibility.css";
 import "./typography-audit.css";
 import "./kpi-hover.css";
+import "./synergy-realisation.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -194,7 +195,21 @@ export default function Home() {
           ["Facilities step-up","Medium","Commit only after 80% headcount milestone"],
         ].map(([risk,level,note])=><article key={risk}><div><b>{risk}</b><em className={level.toLowerCase()}>{level}</em></div><p>{note}</p></article>)}</div>
       </div>
-      <div className="synergy-strip"><div><small>Annual synergy register</small><Drill id="synergies">$1.65M</Drill></div><span><b>$480k</b> shared services</span><span><b>$320k</b> technology</span><span><b>$240k</b> facilities</span><span><b>$336k</b> AI cross-sell</span><span><b>$274k</b> procurement + recruitment</span></div>
+      <div className="synergy-panel">
+        <div className="synergy-total"><small>Annual synergy register</small><strong>$1.65M</strong><p>Recurring value tracked separately from underlying entity EBITDA.</p><div><span><b>42%</b> expected Q1–Q2</span><span><b>58%</b> expected H2</span></div></div>
+        <div className="synergy-cards">{[
+          ["01","Shared services","$480k","29%","CFO / COO","Consolidate finance, people and group support activity; validate removed or avoided cost."],
+          ["02","Technology platforms","$320k","19%","CTO / CFO","Retire overlapping licences and infrastructure; reconcile savings to supplier invoices."],
+          ["03","Facilities","$240k","15%","COO","Sequence footprint consolidation after operating milestones so savings do not constrain delivery."],
+          ["04","AI cross-sell","$336k","20%","AI GM / CCO","Convert existing relationships into active AI subscriptions and report recurring gross profit realised."],
+          ["05","Procurement + recruitment","$274k","17%","CPO / CFO","Combine vendor buying power and internal recruitment capability; track avoided agency and supplier cost."],
+        ].map(([no,label,amount,share,owner,execution])=><article className="synergy-card" key={label} tabIndex={0}>
+          <span className="synergy-no">{no}</span><div><p>{label}</p><strong>{amount}</strong></div><b className="synergy-share">{share}<small>of register</small></b>
+          <div className="synergy-owner"><small>Proposed owner</small>{owner}</div><em>Hover for realisation logic</em>
+          <aside role="tooltip"><header><small>{share} of annual register</small><strong>{amount}</strong></header><h3>{label}</h3><p>{execution}</p><dl><div><dt>Evidence</dt><dd>Monthly realised-versus-plan</dd></div><div><dt>Governance</dt><dd>Owner sign-off in Board pack</dd></div></dl><footer>Source: Executive analysis · Synergy register</footer></aside>
+        </article>)}</div>
+        <div className="synergy-governance"><b>Board control</b><p>Report each line monthly as <strong>planned · committed · realised</strong>; do not allow unrealised synergies to mask entity performance.</p><span>Hover or focus any value for its execution logic</span></div>
+      </div>
     </section>
 
     <section id="decisions" className="chapter decisions-section">
