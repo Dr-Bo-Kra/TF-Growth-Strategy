@@ -6,6 +6,7 @@ import "./priority-evidence.css";
 import "./source-preview.css";
 import "./moat-evidence.css";
 import "./budget-different.css";
+import "./serial-legibility.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 
