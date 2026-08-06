@@ -1,5 +1,6 @@
 "use client";
 import "./drilldowns.css";
+import "./growth.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -29,6 +30,8 @@ export default function Home() {
   const [active, setActive] = useState("thesis");
   const [scenario, setScenario] = useState<"bear" | "expected" | "stretch">("expected");
   const [selected, setSelected] = useState<string | null>(null);
+  const [growthOpen, setGrowthOpen] = useState(false);
+  const [growthTab, setGrowthTab] = useState<"why"|"market"|"moat"|"priorities"|"risks">("why");
   const scenarios = {
     bear: { adoption: "15%", clients: "~62", revenue: 1.07, gp: 0.32, ebitda: -0.25, note: "Pause new AI opex if the plan tracks below this case at month six." },
     expected: { adoption: "30%", clients: "~123", revenue: 2.13, gp: 1.165, ebitda: 0.59, note: "Budget case: phased conversion of the addressable combined client base." },
@@ -45,11 +48,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setSelected(null); };
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); } };
     window.addEventListener("keydown", close);
-    document.body.style.overflow = selected ? "hidden" : "";
+    document.body.style.overflow = selected || growthOpen ? "hidden" : "";
     return () => { window.removeEventListener("keydown", close); document.body.style.overflow = ""; };
-  }, [selected]);
+  }, [selected, growthOpen]);
 
   const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
   const currentDetail = selected === "ai-scenario" ? {
@@ -62,7 +65,7 @@ export default function Home() {
     <header className="masthead">
       <a className="wordmark" href="#thesis"><img src="/tf-logo-wide.png" alt="Talent Formula" /></a>
       <div className="confidential">Confidential · FY2026-27</div>
-      <a className="jump" href="#decisions">Board asks <span>↘</span></a>
+      <div className="header-actions"><button type="button" onClick={()=>setGrowthOpen(true)}>Growth case <span>+</span></button><a className="jump" href="#decisions">Board asks <span>↘</span></a></div>
     </header>
 
     <aside className="rail" aria-label="Board plan chapters">
@@ -112,6 +115,7 @@ export default function Home() {
         <article className="engine ai"><div className="engine-no">C</div><div><span>AI Digital</span><h3>The margin engine</h3><p>Recurring platform revenue distributed through trusted relationships across the combined client base.</p></div><dl><div><dt>FY26/27 revenue</dt><dd><Drill id="ai-engine">$2.13M</Drill></dd></div><div><dt>Gross margin</dt><dd>54.6%</dd></div><div><dt>EBITDA margin</dt><dd>27.6%</dd></div></dl></article>
       </div>
       <div className="flywheel"><b>People</b><span>→</span><b>Client trust</b><span>→</span><b>Data</b><span>→</span><b>Better AI</b><span>→</span><b>Retention</b></div>
+      <button className="growth-entry" type="button" onClick={()=>setGrowthOpen(true)}><span>Strategic growth case</span><b>Why this market, why now, and why Talent Formula</b><i>Explore →</i></button>
     </section>
 
     <section id="scenarios" className="chapter scenario-section">
@@ -170,6 +174,38 @@ export default function Home() {
         <div className="drawer-action"><small>Board implication</small><p>{currentDetail.action}</p></div>
         <div className="drawer-source">Source: {currentDetail.source}</div>
       </aside>
+    </div>}
+    {growthOpen && <div className="growth-layer" role="dialog" aria-modal="true" aria-labelledby="growth-title">
+      <div className="growth-shell">
+        <header className="growth-head"><div><small>Strategic growth case</small><h2 id="growth-title">Why this business can win.</h2></div><button type="button" onClick={()=>setGrowthOpen(false)} aria-label="Close growth case">×</button></header>
+        <nav className="growth-tabs" aria-label="Growth case sections">{([
+          ["why","Why now"],["market","Market"],["moat","Why us"],["priorities","Priorities"],["risks","Risks"]
+        ] as const).map(([id,label],i)=><button key={id} type="button" className={growthTab===id?"active":""} onClick={()=>setGrowthTab(id)}><span>0{i+1}</span>{label}</button>)}</nav>
+        <div className="growth-body">
+          {growthTab==="why" && <section className="growth-why"><div className="growth-title"><small>Why now</small><h3>Three structural forces<br/>are converging <em>at once.</em></h3><p>The opportunity is not simply budget growth. It is a time-bound market window where talent scarcity, AI adoption and outsourcing demand reinforce the group model.</p></div><div className="force-grid">
+            <article><span>01</span><b>Accountant shortage</b><strong>~10%</strong><p>decline in the US accounting workforce from 2019-2024, with similar structural gaps across Australia and the UK.</p></article>
+            <article><span>02</span><b>AI adoption inflection</b><strong>41%</strong><p>projected CAGR for AI in accounting through 2030 as firms seek AI-enabled delivery partners.</p></article>
+            <article><span>03</span><b>Outsourcing acceleration</b><strong>30-35%</strong><p>of small and mid-size US CPA firms now use offshore outsourcing, with adoption accelerating.</p></article>
+          </div><div className="timing-strip"><b>The window</b><p>Clients want cost relief and automation together. Competitors typically offer one or the other; Talent Formula is assembling both under one contract.</p></div></section>}
+          {growthTab==="market" && <section className="growth-market"><div className="growth-title"><small>Market opportunity</small><h3>Large markets.<br/><em>Minimal penetration.</em></h3><p>The growth plan sits at the intersection of accounting services, offshore delivery and AI-enabled workflows.</p></div><div className="market-grid">
+            <article className="market-hero"><small>Global AI in accounting</small><div><strong>$6.7B</strong><span>2025</span><i>→</i><strong>$37.6B</strong><span>2030</span></div><p>41% CAGR · the fastest-growing layer in the group opportunity.</p></article>
+            <article><small>Australia accounting services</small><strong>$33.7B</strong><p>F&A BPO sub-market grows from $797M to $1.32B by 2030.</p></article>
+            <article><small>UK accounting services</small><strong>$51B</strong><p>TF's $4.9M plan represents roughly 0.01% penetration.</p></article>
+            <article><small>Global F&A outsourcing</small><strong>$54.8B</strong><p>Projected to reach $81.25B by 2030.</p></article>
+            <article><small>Offshore enterprise share</small><strong>56%</strong><p>of F&A outsourcing revenue is already offshore-deployed.</p></article>
+          </div><div className="market-note">Market figures reflect the research cited in the supplied executive analysis and should be source-checked before external publication.</div></section>}
+          {growthTab==="moat" && <section className="growth-moat"><div className="growth-title"><small>Why Talent Formula</small><h3>A model competitors<br/>cannot easily <em>replicate.</em></h3><p>The advantage is the combination: domain depth, delivery infrastructure, recruitment speed, proprietary AI and trusted distribution.</p></div><div className="moat-list">
+            {[["Accounting specialisation","761 specialist offshore accountants trained on local compliance frameworks."],["Proven delivery","600+ placements, established onboarding, quality systems and operational infrastructure."],["AI-first model","A proprietary platform deployed into real workflows—not a bolt-on product."],["Recruitment engine","Multi-market sourcing across Australia, the UK and emerging US demand."],["Built-in distribution","410 combined client relationships lower the cost and risk of AI customer acquisition."],["People + AI","Expert humans and intelligent automation delivered through one integrated contract."]].map(([title,copy],i)=><article key={title}><span>{String(i+1).padStart(2,"0")}</span><h4>{title}</h4><p>{copy}</p></article>)}
+          </div><div className="moat-proof"><span>More clients</span><i>→</i><span>More workflow data</span><i>→</i><span>Better AI</span><i>→</i><span>Higher retention</span></div></section>}
+          {growthTab==="priorities" && <section className="growth-priorities"><div className="growth-title"><small>FY2027 priorities</small><h3>Turn the thesis into<br/><em>sequenced execution.</em></h3><p>Growth depends on a small number of linked moves, each with a clear proof point for the Board.</p></div><div className="priority-list">
+            {[["Integrate Frontline Accounting","Realise the $1.65M synergy register and establish one operating model.","Owner-level monthly reporting"],["Scale AI Digital","Convert 30% of the phased addressable client base.","69 active customers"],["Accelerate UK growth","Grow from $2.7M to $4.9M with named pipeline.","1.5× coverage"],["Enter the US","Use the accountant shortage and India delivery base to win the first client.","$1M by FY27/28"],["Expand EBITDA","Move from 9.3% to 12.3% in FY26/27, then beyond 23%.","Pre/post-synergy bridge"],["Build leadership","Create entity P&L ownership and management capacity for a $72M group.","Clear accountable owners"]].map(([title,copy,proof],i)=><article key={title}><span>{String(i+1).padStart(2,"0")}</span><div><h4>{title}</h4><p>{copy}</p></div><b>{proof}</b></article>)}
+          </div></section>}
+          {growthTab==="risks" && <section className="growth-risks"><div className="growth-title"><small>Risk-adjusted growth</small><h3>Ambition with<br/><em>explicit controls.</em></h3><p>The case remains investable only if the Board sees the downside early and management has predetermined responses.</p></div><div className="deep-risk-grid">
+            {[["FLA headcount scale-up","High","620 → 761; each 10% shortfall implies roughly $1.5M of revenue risk.","Weekly vacancy pipeline; 5% and 10% alerts; TF recruitment engine."],["UK revenue assumption","High","79% year-on-year growth with current pipeline around 1.25×.","Growth Lead; named pipeline; 1.5× threshold before budget lock."],["AI adoption uncertainty","High","Bear case at 15% adoption produces approximately ($250k) EBITDA.","Month-six gate; pause new AI opex if below bear."],["TF gross-margin compression","Medium","Margin trends from 53.5% to 45.1% over four years.","3-5% annual pricing uplift; monitor GP per FTE."],["Facilities step-change","Medium","Cost rises from $587k to $1.046M to support 968 FTEs.","Require 80% headcount attainment before each lease tranche."],["FX exposure","Medium","Material GBP/AUD and INR/AUD exposure with flat-rate planning assumptions.","Rolling six-month cover and quarterly sensitivity reporting."]].map(([title,level,risk,control])=><article key={title}><div><h4>{title}</h4><em className={level.toLowerCase()}>{level}</em></div><p>{risk}</p><b>{control}</b></article>)}
+          </div></section>}
+        </div>
+        <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
+      </div>
     </div>}
     <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · Revised executive case</span></footer>
   </main>;
