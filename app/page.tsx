@@ -173,13 +173,11 @@ export default function Home() {
             const detail = drilldowns[id as keyof typeof drilldowns];
             return <article className="kpi-control" key={label} tabIndex={0} aria-describedby={`kpi-detail-${id}`}>
               <span className="kpi-no">{String(i+1).padStart(2,"0")}</span>
-              <div className="kpi-visible"><p className="kpi-name">{label}</p><p className="kpi-why">{detail.summary}</p></div>
+              <p className="kpi-name">{label}</p>
               <b className="kpi-target">{value}</b>
-              <div className="kpi-meta"><span><small>Cadence</small>{detail.rows[2][1]}</span><span><small>Owner</small>{detail.rows[3][1]}</span></div>
-              <p className="kpi-cue">Hover for rationale + execution</p>
               <aside className="kpi-hover-window" id={`kpi-detail-${id}`} role="tooltip">
-                <header><div><small>{detail.eyebrow}</small><h3>{detail.title}</h3></div><strong>{detail.value}</strong></header>
-                <p>{detail.summary}</p>
+                <header><div><small>{detail.eyebrow}</small><h3>Rationale and control</h3></div><strong>{detail.value}</strong></header>
+                <p><b>Why this threshold:</b> {detail.summary}</p>
                 <dl>{detail.rows.map(([term,description])=><div key={term}><dt>{term}</dt><dd>{description}</dd></div>)}</dl>
                 <div className="kpi-playbook"><small>How management executes</small><p>{detail.action}</p></div>
                 <footer><span>{detail.assumption}</span><cite>{detail.source}</cite></footer>
