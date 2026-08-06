@@ -14,10 +14,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "FY2026-27 Board Pack | Talent Formula Group",
-  description: "Executive brief, operating dashboard and full C-Level analysis for the FY2026-27 board presentation.",
+  description: "An original board narrative covering the four-year financial trajectory, growth engines, operating controls and decisions for Talent Formula Group.",
+  metadataBase: new URL("https://talent-formula-board-fy2627.kranthi12.chatgpt.site"),
+  openGraph: {
+    title: "Talent Formula | FY2026-27 Board Plan",
+    description: "Scale the platform. Protect the downside.",
+    images: [{ url: "/og.png", width: 1734, height: 907, alt: "Talent Formula FY2026-27 Board Plan" }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/tf-logo-mark.png",
+    shortcut: "/tf-logo-mark.png",
   },
 };
 
