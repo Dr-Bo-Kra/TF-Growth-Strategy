@@ -10,6 +10,7 @@ import "./serial-legibility.css";
 import "./body-legibility.css";
 import "./header-legibility.css";
 import "./typography-audit.css";
+import "./kpi-hover.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -164,10 +165,26 @@ export default function Home() {
 
     <section id="operating" className="chapter operating-section">
       <div className="chapter-label"><span>05</span><p>Operating plan</p></div>
-      <div className="section-intro"><h2>Manage the plan<br/>through <em>leading indicators.</em></h2><p>Financial results are lagging evidence. These are internal FY26/27 management guardrails from Section 11 of the executive analysis—not external industry benchmarks. Select any target to see its logic, calculation and execution playbook.</p></div>
+      <div className="section-intro"><h2>Manage the plan<br/>through <em>leading indicators.</em></h2><p>Financial results are lagging evidence. These are internal FY26/27 management guardrails from Section 11 of the executive analysis—not external industry benchmarks. Hover over any control to see its rationale, calculation and execution playbook.</p></div>
       <div className="operating-grid">
         <div className="kpi-board">
-          {[ ["FLA billing utilisation",">88%","billing-utilisation"],["Client retention",">92%","client-retention"],["Net revenue retention",">105%","net-revenue-retention"],["Pipeline coverage","1.5×","pipeline"],["Win rate",">40%","win-rate"],["FLA turnover","<18%","fla-turnover"],["Time to recruit","<28 days","time-to-recruit"],["AI active customers","69","ai-active-customers"] ].map(([label,value,id],i)=><article key={label}><span>{String(i+1).padStart(2,"0")}</span><p>{label}</p><Drill id={id}>{value}</Drill></article>)}
+          {[ ["FLA billing utilisation",">88%","billing-utilisation"],["Client retention",">92%","client-retention"],["Net revenue retention",">105%","net-revenue-retention"],["Pipeline coverage","1.5×","pipeline"],["Win rate",">40%","win-rate"],["FLA turnover","<18%","fla-turnover"],["Time to recruit","<28 days","time-to-recruit"],["AI active customers","69","ai-active-customers"] ].map(([label,value,id],i)=>{
+            const detail = drilldowns[id as keyof typeof drilldowns];
+            return <article className="kpi-control" key={label} tabIndex={0} aria-describedby={`kpi-detail-${id}`}>
+              <span className="kpi-no">{String(i+1).padStart(2,"0")}</span>
+              <div className="kpi-visible"><p className="kpi-name">{label}</p><p className="kpi-why">{detail.summary}</p></div>
+              <b className="kpi-target">{value}</b>
+              <div className="kpi-meta"><span><small>Cadence</small>{detail.rows[2][1]}</span><span><small>Owner</small>{detail.rows[3][1]}</span></div>
+              <p className="kpi-cue">Hover for rationale + execution</p>
+              <aside className="kpi-hover-window" id={`kpi-detail-${id}`} role="tooltip">
+                <header><div><small>{detail.eyebrow}</small><h3>{detail.title}</h3></div><strong>{detail.value}</strong></header>
+                <p>{detail.summary}</p>
+                <dl>{detail.rows.map(([term,description])=><div key={term}><dt>{term}</dt><dd>{description}</dd></div>)}</dl>
+                <div className="kpi-playbook"><small>How management executes</small><p>{detail.action}</p></div>
+                <footer><span>{detail.assumption}</span><cite>{detail.source}</cite></footer>
+              </aside>
+            </article>;
+          })}
         </div>
         <div className="risk-register"><div className="risk-title"><small>Risk register</small><b>Watch what can break the case</b></div>{[
           ["FLA headcount ramp","High","Each 10% miss ≈ $1.5M revenue exposure"],
