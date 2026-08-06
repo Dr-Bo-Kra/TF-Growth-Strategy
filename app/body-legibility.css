@@ -1,0 +1,12 @@
+/* Boardroom-distance typography for explanatory and supporting copy. */
+.section-intro>p,.lede{font-size:16px!important;line-height:1.7!important}
+.engine p{font-size:14px!important;line-height:1.65!important}
+.math-stack p,.scenario-note p,.decision-list p{font-size:13px!important;line-height:1.55!important}
+.kpi-board p,.risk-register p{font-size:12px!important;line-height:1.5!important}
+.growth-title>p{font-size:14px!important;line-height:1.7!important}
+.force-grid article>p,.market-grid p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.risk-summary>p,.risk-response p,.difference-grid p,.difference-bottom p{font-size:13px!important;line-height:1.65!important}
+.moat-list p,.priority-list p,.deep-risk-grid p{font-size:13px!important;line-height:1.6!important}
+.timing-strip p{font-size:13px!important;line-height:1.55!important}
+.drawer-head>p{font-size:14px!important;line-height:1.7!important}
+.drawer-callout p,.drawer-action p{font-size:13px!important;line-height:1.6!important}
+@media(max-width:620px){.section-intro>p,.lede{font-size:15px!important}.growth-title>p,.engine p{font-size:13px!important}.force-grid article>p,.market-grid p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.risk-summary>p,.risk-response p,.difference-grid p,.difference-bottom p{font-size:12.5px!important}}
