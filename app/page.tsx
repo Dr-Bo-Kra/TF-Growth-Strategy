@@ -203,7 +203,7 @@ export default function Home() {
           ["04","AI cross-sell","$336k","20%","AI GM / CCO","Convert existing relationships into active AI subscriptions and report recurring gross profit realised."],
           ["05","Procurement + recruitment","$274k","17%","CPO / CFO","Combine vendor buying power and internal recruitment capability; track avoided agency and supplier cost."],
         ].map(([no,label,amount,share,owner,execution])=><article className="synergy-card" key={label} tabIndex={0}>
-          <span className="synergy-no">{no}</span><div><p>{label}</p><strong>{amount}</strong></div><b className="synergy-share">{share}<small>of register</small></b>
+          <span className="synergy-no">{no}</span><div className="synergy-main"><p>{label}</p><div className="synergy-metrics"><strong>{amount}</strong><b className="synergy-share">{share}<small>of register</small></b></div></div>
           <div className="synergy-owner"><small>Proposed owner</small>{owner}</div>
           <aside role="tooltip"><header><small>{share} of annual register</small><strong>{amount}</strong></header><h3>{label}</h3><p>{execution}</p><dl><div><dt>Evidence</dt><dd>Monthly realised-versus-plan</dd></div><div><dt>Governance</dt><dd>Owner sign-off in Board pack</dd></div></dl><footer>Source: Executive analysis · Synergy register</footer></aside>
         </article>)}</div>
