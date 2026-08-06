@@ -71,10 +71,15 @@ export default function Home() {
     return () => { window.removeEventListener("keydown", close); document.body.style.overflow = ""; };
   }, [selected, growthOpen]);
 
-  const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
+  const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${id === "ai-scenario" ? `${scenario} AI Digital scenario` : drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
+  const scenarioReference = {
+    bear: { revenue:"~$1.07M", gp:"~$320k", ebitda:"~($250k)" },
+    expected: { revenue:"$2.13M", gp:"$1.165M", ebitda:"$590k" },
+    stretch: { revenue:"~$3.20M", gp:"~$1.900M", ebitda:"~$1.450M" },
+  }[scenario];
   const currentDetail = selected === "ai-scenario" ? {
-    eyebrow:`AI Digital · ${scenario} case`, title:"FY26/27 scenario revenue", value:money(scenarios[scenario].revenue), summary:scenarios[scenario].note,
-    rows:([["Adoption rate",scenarios[scenario].adoption],["Clients converted",scenarios[scenario].clients],["Gross profit",money(scenarios[scenario].gp)],["EBITDA",scenarios[scenario].ebitda < 0 ? `(${money(Math.abs(scenarios[scenario].ebitda))})` : money(scenarios[scenario].ebitda)]] as [string,string][]),
+    eyebrow:`AI Digital · ${scenario} case`, title:"FY26/27 scenario revenue", value:scenarioReference.revenue, summary:scenarios[scenario].note,
+    rows:([["Adoption rate",scenarios[scenario].adoption],["Clients converted",scenarios[scenario].clients],["Gross profit",scenarioReference.gp],["EBITDA",scenarioReference.ebitda]] as [string,string][]),
     assumption:"Eligible clients enter the funnel in phases: TF first, FA from September and Backroom after February.", action:"Compare actual conversions, live customers and revenue per customer with this case every month.", source:"Executive analysis · AI Digital three-scenario adoption model"
   } : selected ? drilldowns[selected] : null;
 
