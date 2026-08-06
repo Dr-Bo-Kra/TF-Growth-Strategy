@@ -5,6 +5,7 @@ import "./risk-response.css";
 import "./priority-evidence.css";
 import "./source-preview.css";
 import "./moat-evidence.css";
+import "./budget-different.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -35,7 +36,7 @@ export default function Home() {
   const [scenario, setScenario] = useState<"bear" | "expected" | "stretch">("expected");
   const [selected, setSelected] = useState<string | null>(null);
   const [growthOpen, setGrowthOpen] = useState(false);
-  const [growthTab, setGrowthTab] = useState<"why"|"market"|"moat"|"priorities"|"risks">("why");
+  const [growthTab, setGrowthTab] = useState<"why"|"different"|"market"|"moat"|"priorities"|"risks">("why");
   const [riskOpen, setRiskOpen] = useState<string | null>("FLA headcount scale-up");
   const [priorityOpen, setPriorityOpen] = useState<string | null>("Integrate Frontline Accounting");
   const [moatOpen, setMoatOpen] = useState("Accounting specialisation");
@@ -186,7 +187,7 @@ export default function Home() {
       <div className="growth-shell">
         <header className="growth-head"><div><small>Strategic growth case</small><h2 id="growth-title">Why this business can win.</h2></div><button type="button" onClick={()=>setGrowthOpen(false)} aria-label="Close growth case">×</button></header>
         <nav className="growth-tabs" aria-label="Growth case sections">{([
-          ["why","Why now"],["market","Market"],["moat","Why us"],["priorities","Priorities"],["risks","Risks"]
+          ["why","Why now"],["different","Why different"],["market","Market"],["moat","Why us"],["priorities","Priorities"],["risks","Risks"]
         ] as const).map(([id,label],i)=><button key={id} type="button" className={growthTab===id?"active":""} onClick={()=>setGrowthTab(id)}><span>0{i+1}</span>{label}</button>)}</nav>
         <div className="growth-body">
           {growthTab==="why" && <section className="growth-why"><div className="growth-title"><small>Why now</small><h3>Three structural forces<br/>are converging <em>at once.</em></h3><p>The opportunity is not simply budget growth. It is a time-bound market window where talent scarcity, AI adoption and outsourcing demand reinforce the group model.</p></div><div className="force-grid">
@@ -194,6 +195,12 @@ export default function Home() {
             <article><span>02</span><b>AI adoption inflection</b><strong>41%</strong><p>projected CAGR for AI in accounting through 2030 as firms seek AI-enabled delivery partners.</p></article>
             <article><span>03</span><b>Outsourcing acceleration</b><strong>30-35%</strong><p>of small and mid-size US CPA firms now use offshore outsourcing, with adoption accelerating.</p></article>
           </div><div className="timing-strip"><b>The window</b><p>Clients want cost relief and automation together. Competitors typically offer one or the other; Talent Formula is assembling both under one contract.</p></div></section>}
+          {growthTab==="different" && <section className="budget-different"><div className="growth-title"><small>Why this budget is different</small><h3>Not an extrapolation.<br/>A <em>new operating system.</em></h3><p>Most budgets extend yesterday's run rate. This one brings three growth engines online together and changes how the group creates revenue, margin and strategic value.</p></div><div className="difference-hero"><div><small>The shift</small><h4>From three adjacent businesses<br/>to one reinforcing platform.</h4></div><strong>3×</strong><p>growth engines operating simultaneously for the first time</p></div><div className="difference-grid">
+            <article><span>01</span><div><small>FA / FLA</small><h4>Scale plus a digital margin layer</h4><p>Managed-service headcount grows on top of proven delivery infrastructure, while digital revenue expands margin without requiring the same increase in physical delivery cost.</p></div><b>620 → 761 FTEs</b></article>
+            <article><span>02</span><div><small>Talent Formula</small><h4>Geographic growth, not just volume growth</h4><p>The recruitment engine moves beyond the existing base into the UK and emerging US opportunity, diversifying revenue and improving access to higher-rate markets.</p></div><b>+38.5% YoY</b></article>
+            <article><span>03</span><div><small>AI Digital</small><h4>Recurring platform economics</h4><p>The group converts existing relationships into subscription-style revenue through a proprietary platform rather than relying only on labour-linked service growth.</p></div><b>54.6% GP margin</b></article>
+            <article><span>04</span><div><small>Acquisition advantage</small><h4>Distribution arrives with the assets</h4><p>FA and Backroom add clients, delivery capability and workflow access. AI Digital can be sold into trusted relationships instead of building a customer base from zero.</p></div><b>410 clients</b></article>
+          </div><div className="difference-bottom"><div><small>What the Board is underwriting</small><p>A team that has already built the delivery capability, client relationships and AI infrastructure needed to execute the plan.</p></div><div><small>What the Board is not underwriting</small><p>A concept-stage start-up, a financial-engineering story or growth that depends on a single business unit.</p></div><div className="result"><small>The intended result</small><strong>$33.3M → $72.5M</strong><p>with EBITDA margin moving from 9.3% to approximately 24%.</p></div></div><div className="difference-source">Internal reference: Executive analysis · Sections 01, 03, 04, 05 and 12</div></section>}
           {growthTab==="market" && <section className="growth-market"><div className="growth-title"><small>Market opportunity</small><h3>Large markets.<br/><em>Minimal penetration.</em></h3><p>The growth plan sits at the intersection of accounting services, offshore delivery and AI-enabled workflows.</p></div><div className="market-grid">
             <article className="market-hero"><small>Global AI in accounting</small><div><strong>$6.7B</strong><span>2025</span><i>→</i><strong>$37.6B</strong><span>2030</span></div><p>41% CAGR · the fastest-growing layer in the group opportunity.</p></article>
             <article><small>Australia accounting services</small><strong>$33.7B</strong><p>F&A BPO sub-market grows from $797M to $1.32B by 2030.</p></article>
