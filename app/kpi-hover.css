@@ -32,7 +32,12 @@
 @media(max-width:720px){.kpi-board .kpi-control{min-height:210px}.kpi-hover-window,.kpi-control:nth-child(even) .kpi-hover-window,.kpi-control:nth-child(n+5) .kpi-hover-window{position:fixed;left:14px;right:14px;top:auto;bottom:14px;width:auto;max-height:78vh;overflow:auto;transform:translateY(8px)}.kpi-control:focus .kpi-hover-window,.kpi-control:focus-within .kpi-hover-window{transform:none}.kpi-hover-window dl{grid-template-columns:1fr}}
 
 /* Compact board controls: detail belongs in the flyout, not in the grid. */
-.operating-grid{align-items:start}
+.operating-grid{align-items:start;grid-template-areas:"kpis risk" "escalation risk";row-gap:14px}
+.kpi-board{grid-area:kpis}
+.risk-register{grid-area:risk}
+.kpi-escalation{grid-area:escalation;display:grid;grid-template-columns:130px 1fr;gap:18px;align-items:center;padding:14px 18px;background:#edf0f4;border-left:4px solid var(--orange)}
+.kpi-escalation>span{font-size:9px;text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:var(--orange)}
+.kpi-escalation>p{margin:0;font-size:11px;line-height:1.45;color:#586474}.kpi-escalation>p b{color:var(--navy)}
 .kpi-board .kpi-control{min-height:92px;padding:19px 20px;grid-template-columns:34px minmax(0,1fr) auto;grid-template-rows:1fr;gap:10px;align-items:center}
 .kpi-board .kpi-name{margin:0;font-size:14px;line-height:1.3;color:var(--navy);font-weight:800}
 .kpi-board .kpi-target{font-size:25px;align-self:center}
@@ -40,5 +45,5 @@
 .kpi-control:nth-child(odd) .kpi-hover-window{left:calc(200% + 14px)}
 .kpi-control:hover .kpi-hover-window,.kpi-control:focus .kpi-hover-window,.kpi-control:focus-within .kpi-hover-window{transform:translate(0,-50%)}
 .risk-register{align-self:start}
-@media(max-width:1050px){.kpi-hover-window,.kpi-control:nth-child(even) .kpi-hover-window,.kpi-control:nth-child(n+5) .kpi-hover-window,.kpi-control:nth-child(odd) .kpi-hover-window{left:calc(100% + 12px);width:min(480px,48vw)}}
+@media(max-width:1050px){.operating-grid{grid-template-areas:"kpis" "escalation" "risk"}.kpi-hover-window,.kpi-control:nth-child(even) .kpi-hover-window,.kpi-control:nth-child(n+5) .kpi-hover-window,.kpi-control:nth-child(odd) .kpi-hover-window{left:calc(100% + 12px);width:min(480px,48vw)}}
 @media(max-width:720px){.kpi-board .kpi-control{min-height:88px}.kpi-hover-window,.kpi-control:nth-child(even) .kpi-hover-window,.kpi-control:nth-child(n+5) .kpi-hover-window,.kpi-control:nth-child(odd) .kpi-hover-window{position:fixed;left:14px;right:14px;top:auto;bottom:14px;width:auto;transform:translateY(8px)}.kpi-control:hover .kpi-hover-window,.kpi-control:focus .kpi-hover-window,.kpi-control:focus-within .kpi-hover-window{transform:none}}

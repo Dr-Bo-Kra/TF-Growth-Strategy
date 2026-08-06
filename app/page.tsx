@@ -185,6 +185,7 @@ export default function Home() {
             </article>;
           })}
         </div>
+        <div className="kpi-escalation"><span>Escalation rule</span><p><b>Two consecutive misses</b> trigger a named recovery plan, accountable executive and dated corrective actions in the next Board pack.</p></div>
         <div className="risk-register"><div className="risk-title"><small>Risk register</small><b>Watch what can break the case</b></div>{[
           ["FLA headcount ramp","High","Each 10% miss ≈ $1.5M revenue exposure"],
           ["UK revenue plan","High","20% miss ≈ $250k EBITDA impact"],
