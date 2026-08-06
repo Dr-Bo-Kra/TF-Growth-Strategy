@@ -106,9 +106,9 @@ export default function Home() {
 
     <section id="thesis" className="chapter opening">
       <div className="opening-copy">
-        <p className="kicker">Board plan · Revised executive case</p>
-        <h1>Build the category.<br/><em>Compound the engine.</em></h1>
-        <p className="lede">A professional-services platform where specialist offshore accounting, a proven recruitment engine and proprietary AI reinforce one another.</p>
+        <p className="kicker">FY2026–29 · Board growth strategy</p>
+        <h1>Scale the trusted core.<br/><em>Compound the digital advantage.</em></h1>
+        <p className="lede">A disciplined plan to more than double group revenue by combining specialist offshore accounting, a proven recruitment engine and proprietary AI—while protecting delivery quality and cash discipline.</p>
         <div className="signal-row"><div><b>3</b><span>growth engines</span></div><div><Drill id="client-base">410</Drill><span>combined clients</span></div><div><Drill id="synergies">$1.65M</Drill><span>annual synergies</span></div></div>
       </div>
       <div className="north-star">
@@ -302,6 +302,6 @@ export default function Home() {
         <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
       </div>
     </div>}
-    <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · Revised executive case</span></footer>
+    <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · FY2026–29 growth strategy</span></footer>
   </main>;
 }
