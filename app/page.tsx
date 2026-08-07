@@ -13,14 +13,16 @@ import "./typography-audit.css";
 import "./kpi-hover.css";
 import "./synergy-realisation.css";
 import "./presentation-scale.css";
+import "./people-readiness.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 import { bindPresentationScale } from "./presentation-scale";
 
 const nav = [
   ["thesis", "01", "Thesis"], ["trajectory", "02", "Trajectory"],
-  ["engines", "03", "Growth engines"], ["scenarios", "04", "Scenarios"],
-  ["operating", "05", "Operating plan"], ["decisions", "06", "Board decisions"],
+  ["engines", "03", "Growth engines"], ["people", "04", "People readiness"],
+  ["scenarios", "05", "Scenarios"], ["operating", "06", "Operating plan"],
+  ["decisions", "07", "Board decisions"],
 ] as const;
 
 const money = (value: number) => `$${value.toFixed(1)}M`;
@@ -109,6 +111,28 @@ export default function Home() {
       document.body.style.overflow = "";
     };
   }, [selected, growthOpen]);
+  const cultureEvidence = {
+    different:{label:"Why this plan is executable",metric:"87% overall satisfaction",copy:"The budget is supported by measured organisational readiness—not only market and financial assumptions. High enablement and ownership provide the operating foundation for three growth engines."},
+    moat:{label:"A moat competitors cannot buy",metric:"95% enablement · 95% teamwork",copy:"Tools and pricing can be copied more easily than a high-trust culture that combines autonomy, accountability and specialist delivery."},
+    priorities:{label:"People evidence behind execution",metric:"88% leadership · 81% career opportunity",copy:"The survey validates the capacity to execute while identifying the safeguards that preserve readiness: visible careers, recognition, communication and follow-through."},
+    risks:{label:"Culture during scale",metric:"Protect the 87% readiness signal",copy:"The risk is not current culture; it is dilution during rapid hiring and integration. Monitor satisfaction, enablement, regrettable turnover, recognition and visible action as leading indicators."},
+  } as const;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a,b) => b.intersectionRatio-a.intersectionRatio)[0];
+      if (visible) setActive(visible.target.id);
+    }, { threshold: [0.3, 0.55] });
+    nav.forEach(([id]) => { const el = document.getElementById(id); if (el) observer.observe(el); });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); } };
+    window.addEventListener("keydown", close);
+    document.body.style.overflow = selected || growthOpen ? "hidden" : "";
+    return () => { window.removeEventListener("keydown", close); document.body.style.overflow = ""; };
+  }, [selected, growthOpen]);
 
   const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${id === "ai-scenario" ? `${scenario} AI Digital scenario` : drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
   const scenarioReference = {
@@ -179,6 +203,25 @@ export default function Home() {
       <button className="growth-entry" type="button" onClick={()=>setGrowthOpen(true)}><span>Strategic growth case</span><b>Why this market, why now, and why Talent Formula</b><i>Explore →</i></button>
     </section>
 
+    <section id="people" className="chapter people-section">
+      <div className="chapter-label"><span>04</span><p>People readiness</p></div>
+      <div className="people-hero">
+        <div><p className="people-kicker">2025 employee satisfaction · 153 voices</p><h2>The culture is ready to scale.<br/><em>A proven advantage for the growth plan.</em></h2><p className="people-lede">Employee sentiment confirms that Talent Formula already has the enablement, ownership and workplace connection required to execute its growth strategy. The priority is to preserve this cultural advantage as the group adds people, markets and new technology.</p></div>
+        <article className="people-score"><small>Overall satisfaction</small><strong>87%</strong><p>Stable year on year</p><span>3 points above benchmark</span></article>
+      </div>
+      <div className="people-proof">
+        <article><b>153</b><span>employee responses</span></article><article><b>95%</b><span>enablement</span></article><article><b>+11</b><span>teamwork points above benchmark</span></article><article><b>87%</b><span>overall readiness signal</span></article>
+      </div>
+      <div className="people-grid">
+        <section className="people-panel strength-panel"><div className="panel-head"><small>Execution strengths</small><h3>What the growth plan can build on</h3></div>{[["Enablement",95,86],["Teamwork & Ownership",95,84],["Work & Life Blend",94,89]].map(([label,score,benchmark])=><div className="factor" key={label}><div><b>{label}</b><span>{score}%</span></div><i><em style={{width:`${score}%`}}/></i><small>{Number(score)-Number(benchmark)} points above benchmark</small></div>)}</section>
+        <section className="people-panel pressure-panel"><div className="panel-head"><small>Readiness safeguards</small><h3>What protects the advantage as we scale</h3></div>{[["Feedback & Recognition","73%","Strengthen visibility as teams grow"],["Action","71%","Make follow-through more visible"],["Leadership","88%","Strong base to support expansion"],["Two-way communication","78%","High-leverage engagement driver"]].map(([label,score,note])=><article key={label}><div><b>{label}</b><strong>{score}</strong></div><p>{note}</p></article>)}</section>
+      </div>
+      <div className="driver-panel"><div><small>Highest-leverage engagement driver</small><h3>Career opportunities</h3><p>Career opportunity is already 81% favourable and four points above the comparison result. Making pathways more visible will help convert a strong culture into retention and internal capability for the next stage of growth.</p></div><div className="sentiment"><span style={{width:"81%"}}>81% favourable</span><span style={{width:"14%"}}>14%</span><span style={{width:"5%"}}>5%</span><small>n=153 · +4 vs comparison</small></div></div>
+      <div className="people-actions"><div className="actions-intro"><small>Preserve the advantage</small><h3>Scale the operating rhythm with the business</h3></div>{[["01","Visible career pathways","Turn growth across FA, TF and AI Digital into credible internal opportunity."],["02","Leadership connection","Keep strategy and context close to employees as the group adds scale and geography."],["03","Recognition at scale","Make delivery, collaboration and innovation wins visible across a larger organisation."],["04","Visible follow-through","Use a quarterly ‘You said / We did’ scorecard to reinforce trust through execution."]].map(([no,title,copy])=><article key={title}><span>{no}</span><h4>{title}</h4><p>{copy}</p></article>)}</div>
+      <div className="people-board-note"><div><small>Culture as a growth asset</small><p><b>A strong foundation for execution.</b> High enablement, ownership and workplace connection give Talent Formula the organisational capacity to scale its specialist accounting, recruitment and AI growth engines. The Board’s role is to protect this advantage as the group expands.</p></div><a href="./sources/talent-formula-employee-satisfaction-survey-2025.pdf" download>View source survey <span>↓</span></a></div>
+      <p className="people-source">Source: Overall Satisfaction Survey 2025. Driver items n=152–153. The report cover cites an 83% benchmark; the detailed factor table cites 84%, so this view uses the factor-table benchmark and flags the discrepancy.</p>
+    </section>
+
     <section id="scenarios" className="chapter scenario-section">
       <div className="chapter-label"><span>04</span><p>AI adoption scenarios</p></div>
       <div className="section-intro"><h2>Fund the expected case.<br/><em>Gate the downside.</em></h2><p>The corrected budget case reaches 124 active customers at year-end, but recognises $2.13M because TF, FA and Backroom activation is phased through the year.</p></div>
@@ -195,8 +238,9 @@ export default function Home() {
     </section>
 
     <section id="operating" className="chapter operating-section">
-      <div className="chapter-label"><span>05</span><p>Operating plan</p></div>
+      <div className="chapter-label"><span>06</span><p>Operating plan</p></div>
       <div className="section-intro"><h2>Manage the plan<br/>through <em>leading indicators.</em></h2><p>The KPI set now distinguishes benchmark-grounded targets, budget-derived calculations and unvalidated assumptions. Estimated baselines must be replaced with FY25/26 actuals before Board submission.</p></div>
+      <div className="people-kpi-band"><div><small>People readiness</small><b>Culture is a leading indicator of execution capacity.</b></div><article><strong>87%</strong><span>overall satisfaction · maintain</span></article><article><strong>≥92%</strong><span>enablement · protect</span></article><article><strong>81%</strong><span>career opportunity · improve</span></article><article><strong>73%</strong><span>recognition · improve</span></article><article><strong>71%</strong><span>visible action · improve</span></article><a href="#people">Full evidence →</a></div>
       <div className="operating-grid">
         <div className="kpi-board">
           {[ ["Client retention",">92%","client-retention"],["FLA turnover","<18%","fla-turnover"],["FLA billing utilisation",">88%","billing-utilisation"],["Proposal win rate",">40%","win-rate"],["Pipeline coverage","1.5×","pipeline"],["GP per FLA FTE","$10.2k","gp-fla"],["GP per TF FTE","$22.1k","gp-tf"],["FA managed NRR",">104%","nrr-fa"],["AI Digital NRR",">115%","nrr-ai"],["Time to recruit","<28 days","time-to-recruit"],["AI active customers","124","ai-active-customers"],["AI run-rate MRR","$242k","ai-mrr"] ].map(([label,value,id],i)=>{
@@ -277,7 +321,7 @@ export default function Home() {
     </section>
 
     <section id="decisions" className="chapter decisions-section">
-      <div className="chapter-label"><span>06</span><p>Board decisions</p></div>
+      <div className="chapter-label"><span>07</span><p>Board decisions</p></div>
       <div className="decision-intro"><p>The ask is not approval of a static forecast.</p><h2>Approve the controls<br/>that make the ambition <em>investable.</em></h2></div>
       <div className="decision-list">
         {[
@@ -311,7 +355,7 @@ export default function Home() {
             <article><span>01</span><b>Accountant shortage</b><strong>~10%</strong><p>decline in the US accounting workforce from 2019-2024, with similar structural gaps across Australia and the UK.</p></article>
             <article><span>02</span><b>AI adoption inflection</b><strong>41%</strong><p>projected CAGR for AI in accounting through 2030 as firms seek AI-enabled delivery partners.</p></article>
             <article><span>03</span><b>Outsourcing acceleration</b><strong>30-35%</strong><p>of small and mid-size US CPA firms now use offshore outsourcing, with adoption accelerating.</p></article>
-          </div><div className="timing-strip"><b>The window</b><p>Clients want cost relief and automation together. Competitors typically offer one or the other; Talent Formula is assembling both under one contract.</p></div></section>}
+          </div><div className="timing-strip"><b>The window</b><p>Clients want cost relief and automation together. Competitors typically offer one or the other; Talent Formula is assembling both under one contract.</p><div className="people-evidence"><small>Why Talent Formula is ready now</small><b>87% satisfaction · 95% enablement</b><p>The market window does not require a cultural turnaround first. Employees already report the autonomy, resources and ownership needed to absorb growth and new technology.</p><a href="#people" onClick={()=>setGrowthOpen(false)}>People readiness →</a></div></div></section>}
           {growthTab==="different" && <section className="budget-different"><div className="growth-title"><small>Why this budget is different</small><h3>Not an extrapolation.<br/>A <em>new operating system.</em></h3><p>Most budgets extend yesterday's run rate. This one brings three growth engines online together and changes how the group creates revenue, margin and strategic value.</p></div><div className="difference-hero"><div><small>The shift</small><h4>From three adjacent businesses<br/>to one reinforcing platform.</h4></div><strong>3×</strong><p>growth engines operating simultaneously for the first time</p></div><div className="difference-grid">
             <article><span>01</span><div><small>FA / FLA</small><h4>Scale plus a digital margin layer</h4><p>Managed-service headcount grows on top of proven delivery infrastructure, while digital revenue expands margin without requiring the same increase in physical delivery cost.</p></div><b>620 → 761 FTEs</b></article>
             <article><span>02</span><div><small>Talent Formula</small><h4>Geographic growth, not just volume growth</h4><p>The recruitment engine moves beyond the existing base into the UK and emerging US opportunity, diversifying revenue and improving access to higher-rate markets.</p></div><b>+38.5% YoY</b></article>
@@ -332,7 +376,8 @@ export default function Home() {
               ["AI-first operating model","54.6% gross margin","AI Digital is embedded in how the group services clients rather than sold as an unrelated bolt-on. The platform is already deployed across the FA and TF client base.","Every deployment produces workflow learning: more clients create more data, better automation and stronger retention.","A high-margin digital layer can compound on top of the existing delivery base at low marginal cost."],
               ["Recruitment engine","AUD · UK · US","TF can source, assess and place accounting talent across Australia, the UK and emerging US markets. This capability directly supports FA's planned scale to 968 FTEs in FY27/28.","Speed and cross-market reach create a practical moat that captive or local providers struggle to reproduce.","The same engine supports organic growth, acquisition integration and new-market entry."],
               ["Client relationships & implementation","410 combined clients","FA's 180+ managed-service clients, TF's 50+ active clients and the Backroom client base create a combined distribution channel for AI Digital.","The group is upselling trusted relationships rather than acquiring SaaS customers through cold prospecting.","Near-zero incremental customer-acquisition cost makes AI adoption more defensible than a greenfield SaaS model."],
-              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."]
+              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."],
+["Culture built for execution","95% enabled","The 2025 employee survey records 95% enablement, 95% teamwork and ownership, 94% work-life blend and 87% overall satisfaction.","Tools and pricing can be copied more easily than a high-trust culture that combines autonomy, accountability and domain delivery.","The group can pursue FA scale, geographic growth and AI adoption without first requiring a cultural turnaround."]
             ].map(([title,proof,detail,difference,value],i)=><button key={title} type="button" className={moatOpen===title?"active":""} onClick={()=>setMoatOpen(title)}><span>{String(i+1).padStart(2,"0")}</span><b>{title}</b><small>{proof}</small><i>→</i></button>)}
           </div>{[
               ["Accounting specialisation","761 FLA specialists","We do not serve every industry—we go deep in accounting. FA/FLA's 761 specialist offshore accountants are trained on local compliance frameworks and delivery requirements.","Generalist offshore providers cannot match the same domain depth and quality consistency.","Specialisation supports premium pricing, stronger client trust and higher retention."],
@@ -340,7 +385,8 @@ export default function Home() {
               ["AI-first operating model","54.6% gross margin","AI Digital is embedded in how the group services clients rather than sold as an unrelated bolt-on. The platform is already deployed across the FA and TF client base.","Every deployment produces workflow learning: more clients create more data, better automation and stronger retention.","A high-margin digital layer can compound on top of the existing delivery base at low marginal cost."],
               ["Recruitment engine","AUD · UK · US","TF can source, assess and place accounting talent across Australia, the UK and emerging US markets. This capability directly supports FA's planned scale to 968 FTEs in FY27/28.","Speed and cross-market reach create a practical moat that captive or local providers struggle to reproduce.","The same engine supports organic growth, acquisition integration and new-market entry."],
               ["Client relationships & implementation","410 combined clients","FA's 180+ managed-service clients, TF's 50+ active clients and the Backroom client base create a combined distribution channel for AI Digital.","The group is upselling trusted relationships rather than acquiring SaaS customers through cold prospecting.","Near-zero incremental customer-acquisition cost makes AI adoption more defensible than a greenfield SaaS model."],
-              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."]
+              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."],
+["Culture built for execution","95% enabled","The 2025 employee survey records 95% enablement, 95% teamwork and ownership, 94% work-life blend and 87% overall satisfaction.","Tools and pricing can be copied more easily than a high-trust culture that combines autonomy, accountability and domain delivery.","The group can pursue FA scale, geographic growth and AI adoption without first requiring a cultural turnaround."]
             ].filter(([title])=>title===moatOpen).map(([title,proof,detail,difference,value])=><div className="moat-stage" key={title}><div className="moat-stage-head"><small>Selected advantage</small><h4>{title}</h4><strong>{proof}</strong></div><div className="moat-stage-grid"><div><small>Operational proof</small><p>{detail}</p></div><div><small>Why it is different</small><p>{difference}</p></div><div className="value"><small>Strategic value</small><p>{value}</p></div></div></div>)}<div className="moat-proof"><span>More clients</span><i>→</i><span>More workflow data</span><i>→</i><span>Better AI</span><i>→</i><span>Higher retention</span></div></section>}
           {growthTab==="priorities" && <section className="growth-priorities"><div className="growth-title"><small>FY2027 priorities</small><h3>Turn the thesis into<br/><em>sequenced execution.</em></h3><p>Growth depends on a small number of linked moves. Expand each priority to see why it matters, the evidence behind it and the proof point the Board should require.</p></div><div className="priority-evidence-list">
             {[
@@ -362,6 +408,7 @@ export default function Home() {
               ["FX exposure","Medium","Material GBP/AUD and INR/AUD exposure with flat-rate planning assumptions.","GBP/AUD or INR/AUD moves beyond the approved 5% sensitivity band.","CFO","Implement rolling six-month GBP/AUD cover, match currency inflows and outflows where possible and reprice exposed contracts at renewal.","Quarterly hedged-versus-unhedged position and 5% sensitivity in every Board pack."]
             ].map(([title,level,risk,trigger,owner,response,monitoring])=><article key={title} className={riskOpen===title?"open":""}><button type="button" className="risk-summary" onClick={()=>setRiskOpen(riskOpen===title?null:title)} aria-expanded={riskOpen===title}><span><h4>{title}</h4><em className={level.toLowerCase()}>{level}</em></span><p>{risk}</p><i>{riskOpen===title?"−":"+"}</i></button>{riskOpen===title&&<div className="risk-response"><div><small>Trigger</small><p>{trigger}</p></div><div><small>Accountable owner</small><p>{owner}</p></div><div className="response-main"><small>How we address it</small><p>{response}</p></div><div><small>Board monitoring</small><p>{monitoring}</p></div></div>}</article>)}
           </div></section>}
+          {growthTab in cultureEvidence && <div className="people-evidence"><small>{cultureEvidence[growthTab as keyof typeof cultureEvidence].label}</small><b>{cultureEvidence[growthTab as keyof typeof cultureEvidence].metric}</b><p>{cultureEvidence[growthTab as keyof typeof cultureEvidence].copy}</p><a href="#people" onClick={()=>setGrowthOpen(false)}>Explore people readiness →</a></div>}
         </div>
         <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
       </div>
