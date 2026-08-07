@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FY2026-27 Board Pack | Talent Formula Group",
-  description: "An original board narrative covering the four-year financial trajectory, growth engines, operating controls and decisions for Talent Formula Group.",
-  metadataBase: new URL("https://talent-formula-board-fy2627.kranthi12.chatgpt.site"),
+  title: "TF Growth Strategy | Talent Formula",
+  description: "TF Growth Strategy: four-year financial trajectory, growth engines, operating controls and board decisions for Talent Formula Group.",
+  metadataBase: new URL("https://dr-bo-kra.github.io/TF-Growth-Strategy"),
   openGraph: {
-    title: "Talent Formula | FY2026-27 Board Plan",
+    title: "TF Growth Strategy",
     description: "Scale the platform. Protect the downside.",
-    images: [{ url: "/og.png", width: 1734, height: 907, alt: "Talent Formula FY2026-27 Board Plan" }],
+    images: [{ url: "/og.png", width: 1734, height: 907, alt: "TF Growth Strategy" }],
   },
   twitter: { card: "summary_large_image", images: ["/og.png"] },
   icons: {

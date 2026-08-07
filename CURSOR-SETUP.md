@@ -1,12 +1,12 @@
-# Talent Formula Board Website — Cursor handoff
+# TF Growth Strategy — Cursor handoff
 
-This folder contains the complete editable source project.
+This folder contains the complete editable source project for **TF Growth Strategy**.
 
 ## Open in Cursor
 
 1. Extract the ZIP file.
 2. In Cursor, choose **File → Open Folder**.
-3. Select the extracted `Talent-Formula-Board-Cursor-Source` folder.
+3. Select the extracted project folder.
 4. Open Cursor's terminal and run:
 
 ```powershell
