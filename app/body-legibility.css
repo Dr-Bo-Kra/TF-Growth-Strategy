@@ -1,7 +1,9 @@
 /* Boardroom-distance typography for explanatory and supporting copy. */
 .section-intro>p,.lede{font-size:16px!important;line-height:1.65!important;max-width:62ch}
 .engine p{font-size:15px!important;line-height:1.6!important;color:#d5dde8!important}
-.engine.ai p{color:#49200a!important}
+/* Orange AI card: dark ink must beat navy-surface !important lightens (esp. ≥1280px). */
+.engine.ai p,.engine.ai dt,.engine.ai > div > span,.engine.ai .engine-no{color:#49200a!important}
+.engine.ai dd,.engine.ai dd .drill{color:#171717!important}
 .math-stack p,.scenario-note p,.decision-list p,.decision-intro>p{font-size:14px!important;line-height:1.55!important}
 .kpi-board p,.kpi-escalation>p{font-size:14px!important;line-height:1.55!important}
 .risk-register p{font-size:14px!important;line-height:1.55!important;color:#5c6778!important}

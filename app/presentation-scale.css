@@ -316,4 +316,15 @@
   .engine dt {
     color: #b8c4d6 !important;
   }
+  /* Keep AI margin-engine labels dark on brand orange (overrides navy-surface lighten above). */
+  .engine.ai dt,
+  .engine.ai > div > span,
+  .engine.ai .engine-no,
+  .engine.ai p {
+    color: #49200a !important;
+  }
+  .engine.ai dd,
+  .engine.ai dd .drill {
+    color: #171717 !important;
+  }
 }
