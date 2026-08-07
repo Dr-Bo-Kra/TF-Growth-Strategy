@@ -138,7 +138,19 @@ Motor-vehicle lease: +4.7% | 0.0% | 0.0%
 n/m means the percentage is not meaningful because the prior-year value was zero. The dashboard revenue schedule covers TF+FA/QGCC; AI Digital is held in Tech Consolidated.`;
 
 function answerStrategy(question:string) {
-  const query = question.toLowerCase();
+  const query = question.toLowerCase().replace(/[’']/g, "'");
+  const asksAiRevenue = /\bai(?: digital)?\b/.test(query) && /revenue|sales/.test(query);
+  if (asksAiRevenue) {
+    const asks2728 = /27\s*[\/–-]\s*28|fy\s*27\s*[\/–-]\s*28|2027\s*[\/–-]\s*28/.test(query) || /\bin\s+(?:fy\s*)?28\b/.test(query);
+    const asks2627 = /26\s*[\/–-]\s*27|fy\s*26\s*[\/–-]\s*27|2026\s*[\/–-]\s*27/.test(query) || /\bin\s+(?:fy\s*)?27\b/.test(query);
+    if (asks2728) return { text:"AI Digital revenue is $3.1M in FY27/28. I interpreted ‘28’ as the financial year ending FY27/28.", sources:["Executive analysis · Section 07 full P&L summary"] };
+    if (asks2627) return { text:"AI Digital revenue is $2.13M in FY26/27 (approximately $2.1M). I interpreted ‘27’ as the financial year ending FY26/27.", sources:["AI Pricing Model · FY26/27 expected case", "KPI Analysis · AI Digital adoption scenarios"] };
+    return { text:"Which period do you mean: FY26/27 or FY27/28? The approved figures are $2.13M and $3.1M respectively.", sources:["AI Pricing Model · FY26/27 expected case", "Executive analysis · Section 07 full P&L summary"] };
+  }
+  const asksRevenueChange = /revenue/.test(query) && /change|growth|percentage|percent|%/.test(query);
+  if (asksRevenueChange && (/\b27\b/.test(query) || /26\s*[\/–-]\s*27/.test(query)) && (/\b28\b/.test(query) || /27\s*[\/–-]\s*28/.test(query))) {
+    return { text:"Group revenue increases from $33.3M to $42.0M in FY26/27, a 26.1% year-on-year increase. It then rises to $58.7M in FY27/28, a 39.8% increase. I treated ‘27 and 28’ as FY26/27 and FY27/28 and used the rounded Board-chart figures.", sources:["Executive analysis · Four-year financial trajectory", "Executive analysis · Section 07 full P&L summary"] };
+  }
   const asksAllChanges = query.includes("revenue") && (query.includes("expense") || query.includes("opex")) && (query.includes("change") || query.includes("%") || query.includes("percentage"));
   if (asksAllChanges) return { text:"Complete year-on-year revenue and expense comparison", view:"financial-changes" as const, sources:["Budget Dashboard FY2026/27 · Revenue Breakdown", "Budget Dashboard FY2026/27 · Full OpEx Line-Item Breakdown"] };
   const theme = strategyThemes.map(item => ({ item, score:item.keywords.reduce((score,key)=>score+(query.includes(key)?key.length:0),0) })).sort((a,b)=>b.score-a.score)[0];
@@ -197,6 +209,9 @@ export default function Home() {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [voiceStatus, setVoiceStatus] = useState("Ready for push-to-talk");
   const recognitionRef = useRef<VoiceRecognition | null>(null);
+  const voiceTranscriptRef = useRef("");
+  const voiceSessionActiveRef = useRef(false);
+  const submitOnVoiceEndRef = useRef(false);
 
   const scenarios = {
     bear: { adoption: "15%", clients: "~62", revenue: 1.1, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "The pricing model states this case remains above the fixed-cost break-even point." },
@@ -285,32 +300,69 @@ export default function Home() {
       window.speechSynthesis.cancel();
       const spoken = "view" in answer ? "I have prepared the complete year on year revenue and expense comparison as a structured table on screen." : answer.text;
       const utterance = new SpeechSynthesisUtterance(spoken);
-      utterance.rate = 1;
-      utterance.pitch = 1;
+      const voices = window.speechSynthesis.getVoices();
+      utterance.voice = voices.find(voice=>/natural|premium|enhanced/i.test(voice.name) && /^en[-_]/i.test(voice.lang))
+        || voices.find(voice=>/^en-(AU|GB)/i.test(voice.lang))
+        || voices.find(voice=>/^en[-_]/i.test(voice.lang))
+        || null;
+      utterance.rate = 0.94;
+      utterance.pitch = 0.96;
       window.speechSynthesis.speak(utterance);
     }
   };
   const toggleListening = () => {
-    if (isListening) { recognitionRef.current?.stop(); return; }
+    if (isListening) {
+      voiceSessionActiveRef.current = false;
+      submitOnVoiceEndRef.current = true;
+      setVoiceStatus("Finishing your question…");
+      recognitionRef.current?.stop();
+      return;
+    }
     const voiceWindow = window as typeof window & {SpeechRecognition?:new()=>VoiceRecognition;webkitSpeechRecognition?:new()=>VoiceRecognition};
     const Recognition = voiceWindow.SpeechRecognition || voiceWindow.webkitSpeechRecognition;
     if (!Recognition) { setVoiceStatus("Voice input is not supported in this browser. You can still type your question."); return; }
     const recognition = new Recognition();
     recognition.lang = "en-AU";
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
+    voiceTranscriptRef.current = "";
+    submitOnVoiceEndRef.current = false;
+    voiceSessionActiveRef.current = true;
     recognition.onresult = event => {
-      let transcript=""; let final=false;
-      for(let i=0;i<event.results.length;i++){transcript+=event.results[i][0].transcript;final=final||event.results[i].isFinal;}
-      setChatInput(transcript.trim());
-      setVoiceStatus(final?"Question captured":"Listening…");
-      if(final)askStrategy(transcript);
+      let transcript = "";
+      for (let i=0;i<event.results.length;i++) transcript += event.results[i][0].transcript;
+      voiceTranscriptRef.current = transcript.trim();
+      setChatInput(voiceTranscriptRef.current);
+      setVoiceStatus("Listening — tap stop when you have finished");
     };
-    recognition.onerror = event => {setVoiceStatus(event.error==="not-allowed"?"Microphone access is blocked in this preview. Open the local site in Chrome or Edge and allow microphone access there.":"I couldn’t hear that clearly. Please try again.");setIsListening(false);};
-    recognition.onend = () => {setIsListening(false);recognitionRef.current=null;};
-    recognitionRef.current=recognition;
+    recognition.onerror = event => {
+      if (event.error === "not-allowed") {
+        voiceSessionActiveRef.current = false;
+        setVoiceStatus("Microphone access is blocked. Open the site in Chrome or Edge and allow microphone access.");
+      } else if (event.error !== "no-speech") {
+        voiceSessionActiveRef.current = false;
+        setVoiceStatus("I couldn’t hear that clearly. Please try again.");
+      }
+      setIsListening(voiceSessionActiveRef.current);
+    };
+    recognition.onend = () => {
+      if (voiceSessionActiveRef.current) {
+        setVoiceStatus("Still listening — take your time");
+        window.setTimeout(() => { try { recognition.start(); } catch {} }, 250);
+        return;
+      }
+      setIsListening(false);
+      recognitionRef.current = null;
+      const captured = voiceTranscriptRef.current.trim();
+      if (submitOnVoiceEndRef.current && captured) {
+        submitOnVoiceEndRef.current = false;
+        setVoiceStatus("Question captured");
+        askStrategy(captured);
+      }
+    };
+    recognitionRef.current = recognition;
     setIsListening(true);
-    setVoiceStatus("Listening…");
+    setVoiceStatus("Listening — tap stop when you have finished");
     recognition.start();
   };
 
