@@ -17,11 +17,26 @@ export const metadata: Metadata = {
   description: "TF Growth Strategy: four-year financial trajectory, growth engines, operating controls and board decisions for Talent Formula Group.",
   metadataBase: new URL("https://dr-bo-kra.github.io/TF-Growth-Strategy"),
   openGraph: {
+    type: "website",
+    siteName: "Talent Formula",
     title: "TF Growth Strategy",
     description: "Scale the platform. Protect the downside.",
-    images: [{ url: "/og.png", width: 1734, height: 907, alt: "TF Growth Strategy" }],
+    url: "https://dr-bo-kra.github.io/TF-Growth-Strategy/",
+    images: [
+      {
+        url: "https://dr-bo-kra.github.io/TF-Growth-Strategy/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Talent Formula — TF Growth Strategy",
+      },
+    ],
   },
-  twitter: { card: "summary_large_image", images: ["/og.png"] },
+  twitter: {
+    card: "summary_large_image",
+    title: "TF Growth Strategy",
+    description: "Scale the platform. Protect the downside.",
+    images: ["https://dr-bo-kra.github.io/TF-Growth-Strategy/og.png"],
+  },
   icons: {
     icon: "/tf-logo-mark-v2.png",
     shortcut: "/tf-logo-mark-v2.png",
