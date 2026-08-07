@@ -278,9 +278,10 @@
   }
 }
 
-/* Navy surface contrast: slightly brighter supporting copy on large boards */
+/* Navy surface contrast: slightly brighter supporting copy on large boards.
+   Exclude .engine.ai — orange card must never receive navy-surface light ink. */
 @media (min-width: 1280px) {
-  .engine p,
+  .engine:not(.ai) p,
   .force-grid article > p,
   .market-grid p,
   .moat-stage-grid p,
@@ -313,18 +314,20 @@
   .kpi-hover-window dt {
     color: #c0cad9 !important;
   }
-  .engine dt {
+  .engine:not(.ai) dt {
     color: #b8c4d6 !important;
   }
-  /* Keep AI margin-engine labels dark on brand orange (overrides navy-surface lighten above). */
-  .engine.ai dt,
-  .engine.ai > div > span,
-  .engine.ai .engine-no,
-  .engine.ai p {
-    color: #49200a !important;
-  }
-  .engine.ai dd,
-  .engine.ai dd .drill {
-    color: #171717 !important;
-  }
+}
+
+/* AI Digital orange margin-engine: dark-on-orange always (any viewport / scale).
+   Higher specificity than navy-surface .engine / .engine:not(.ai) lightens. */
+.engines-section article.engine.ai .engine-no,
+.engines-section article.engine.ai > div > span,
+.engines-section article.engine.ai p,
+.engines-section article.engine.ai dt {
+  color: #49200a !important;
+}
+.engines-section article.engine.ai dd,
+.engines-section article.engine.ai dd .drill {
+  color: #171717 !important;
 }
