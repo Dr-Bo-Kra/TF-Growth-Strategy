@@ -14,8 +14,9 @@ import "./kpi-hover.css";
 import "./synergy-realisation.css";
 import "./presentation-scale.css";
 import "./people-readiness.css";
+import "./strategy-chat.css";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { bindPresentationScale } from "./presentation-scale";
 
 const nav = [
@@ -58,6 +59,125 @@ const drilldowns: Record<string, { eyebrow:string; title:string; value:string; s
   "ai-mrr": { eyebrow:"Direct from budget · verified", title:"AI Digital June run-rate MRR", value:"$242,483", summary:"The June run-rate comes directly from the budget worksheet after TF and FA activate in September and Backroom activates in January.", rows:[["Sep 26","$179,338"],["Jan-Jun 27","$242,483"],["Platform","$2,700 · all adopters"],["AI employee","$1,800 · 30% of adopters"]], assumption:"The budget uses segment-specific internally derived realised rates; the $15,000 setup fee applies to 30% of adopters and is excluded from MRR.", action:"Track actual MRR against the monthly build; treat September below $150k as the earliest conversion warning.", source:"AI Pricing Model · pages 7-8 · AI Digital MRR Run-Rate" },
 };
 
+type ChatMessage = { role:"assistant"|"user"; text:string; sources?:string[]; view?:"financial-changes" };
+type VoiceRecognition = {lang:string;continuous:boolean;interimResults:boolean;start:()=>void;stop:()=>void;onresult:((event:{results:ArrayLike<{0:{transcript:string};isFinal:boolean}>})=>void)|null;onerror:((event:{error:string})=>void)|null;onend:(()=>void)|null};
+
+const strategyThemes = [
+  { keywords:["dashboard","dashboard comparison","dashboard says","dashboard numbers","reconcile dashboard","40.2","69.4","42.4","72.8","scope"], answer:"The figures reconcile by scope. The TF+FA consolidated model excludes AI Digital and reports $40.2M in FY26/27 and $69.4M in FY28/29. Adding Tech Consolidated / AI Digital produces full-group revenue of approximately $42.4M and $72.8M. The Board page’s $42.0M and $72.5M are rounded presentation figures and are directionally consistent with the full-group totals—not a competing forecast. The implied AI Digital contribution is about $2.2M in FY26/27 and $3.4M in FY28/29.", sources:["TF+FA Consolidated · row 21 · excludes AI Digital", "Tech Consolidated · AI Digital", "C-Level Executive Analysis · rounded full-group presentation"] },
+  { keywords:["monthly p&l","monthly revenue","monthly ebitda","september loss","month by month"], answer:"The uploaded dashboard provides the monthly FY26/27 operating profile. Revenue ranges from $2.782M in August to $3.613M in April. September is the only EBITDA-negative month at approximately −$31.9k, after OpEx rises to about $1.139M. EBITDA strengthens to roughly $389k in January and peaks around $394k in April. This is useful as an execution cadence, but it belongs to the dashboard case rather than the revised executive baseline.", sources:["Budget Dashboard FY2026/27 · dashboard (6) · Monthly P&L"] },
+  { keywords:["dashboard forecast","dashboard ebitda","dashboard margin","cost structure","dashboard opex"], answer:"In the uploaded dashboard case, FY26/27 gross profit is $15.195M at 37.78%, OpEx is $11.360M and EBITDA is $3.835M at 9.53%. By FY28/29 it forecasts $30.617M gross profit, $13.478M OpEx and $17.139M EBITDA at 24.69%. The dashboard therefore shows strong later operating leverage, but a lower first-year EBITDA than the revised post-synergy Board case.", sources:["Budget Dashboard FY2026/27 · dashboard (6) · Four-year P&L"] },
+  { keywords:["why now","timing","market window","shortage"], answer:"The plan is timely because accounting talent shortages are structural, outsourcing adoption is established, and Talent Formula has specialist delivery capacity, a proven recruitment engine and an AI proposition ready at the same time. The survey strengthens the timing case: 95% enablement and 95% teamwork suggest the organisation does not need a cultural turnaround before scaling.", sources:["C-Level Executive Analysis · Why Now", "Overall Satisfaction Survey 2025 · Enablement and Teamwork"] },
+  { keywords:["why us","advantage","moat","different","win"], answer:"Talent Formula’s advantage is the combination, not any single asset. Accounting specialisation protects quality; the recruitment engine supplies scarce talent; trusted client relationships provide distribution; and AI Digital adds recurring economics. The survey adds a harder-to-copy execution moat: 87% overall satisfaction, 95% enablement and 95% teamwork.", sources:["C-Level Executive Analysis · Why Talent Formula is positioned to win", "Overall Satisfaction Survey 2025 · Executive strengths"] },
+  { keywords:["culture","people","survey","employee","readiness"], answer:"The culture is an enabler of the growth case, not the constraint. The survey records 87% overall satisfaction, 95% enablement, 95% teamwork and 94% work-life blend. Management’s task is to preserve that advantage during rapid hiring and integration through clearer careers, recognition, two-way communication and visible follow-through.", sources:["Overall Satisfaction Survey 2025 · 153 responses"] },
+  { keywords:["biggest risk","risks","break the case","downside"], answer:"The most material execution risks are FLA headcount delivery, the UK revenue assumption, unproven AI adoption, Talent Formula gross-margin compression, facilities commitments and FX exposure. The plan addresses them with explicit triggers, accountable owners and monthly Board monitoring.", sources:["C-Level Executive Analysis · Risk-adjusted growth case", "AI Pricing Model · Operating guardrails"] },
+  { keywords:["budget different","different budget","what is different"], answer:"This budget is different because it connects growth to an operating system: three distinct engines, a phased AI pricing model, twelve leading KPIs, named risk triggers, an itemised $1.65M synergy register and measured people readiness. It also separates sourced facts, calculated targets and assumptions that still require validation.", sources:["C-Level Executive Analysis · Revised executive case", "KPI Analysis FY2026/27", "AI Pricing Model"] },
+];
+
+const dashboardChangeAnswer = `Year-on-year percentage change (FY25/26→FY26/27 | FY26/27→FY27/28 | FY27/28→FY28/29)
+
+REVENUE
+TF Australia: +30.9% | +22.6% | +25.3%
+TF UK: +88.7% | +69.9% | +56.5%
+TF Other: +41.0% | +53.7% | +47.9%
+TF total: +48.2% | +42.1% | +40.7%
+Frontline Accounting: +8.1% | +16.5% | +15.8%
+QGCC: −49.9% | 0.0% | 0.0%
+TF+FA total excluding QGCC: +19.6% | +39.3% | +24.3%
+Dashboard total including QGCC: +18.1% | +39.0% | +24.2%
+
+PROFIT AND EXPENSE TOTALS
+Direct costs: +13.5% | +22.8% | +26.2%
+Gross profit: +26.6% | +65.6% | +21.7%
+Total OpEx: +27.8% | +10.2% | +7.6%
+
+OPERATING EXPENSE ITEMS
+Executive-team salaries: +103.1% | 0.0% | 0.0%
+Admin labour: −12.0% | +16.0% | +15.8%
+Sales-team salaries: −3.2% | 0.0% | 0.0%
+IT-support salaries: +110.8% | +10.0% | +10.0%
+Recruitment/HR salaries: +19.7% | +10.0% | +10.0%
+Office-operations salaries: +20.0% | +10.1% | +9.9%
+Housekeeping/drivers: +18.8% | +10.0% | +10.0%
+Salary MV: 0.0% | 0.0% | 0.0%
+PF administration charges: +27.3% | +10.0% | +9.7%
+PF contributions—admin: +32.0% | +10.0% | +9.7%
+Payroll taxes and benefits: 0.0% | +15.9% | +13.2%
+Hyderabad office rent: +57.7% | +2.1% | +2.1%
+Facilities: +1.4% | +78.1% | +7.7%
+Accommodation rent: +118.9% | 0.0% | +2.6%
+Rent recharge to Quantaco: −89.1% | 0.0% | 0.0%
+Executive marketing: −0.3% | −0.5% | +2.8%
+India marketing: +85.8% | 0.0% | 0.0%
+Computer licences/software: +61.1% | +5.6% | +7.3%
+Marketing software tools: n/m | 0.0% | 0.0%
+Computer maintenance/hardware: +8.3% | 0.0% | 0.0%
+Computer leases: −97.5% | +2,383.3% | +131.7%
+Other operating expenses: −8.5% | +9.9% | +11.3%
+Staff amenities: +39.8% | +5.9% | +7.6%
+Staff meals: +48.3% | +4.7% | +6.1%
+Staff travel: +71.3% | 0.0% | 0.0%
+Staff wellbeing: +20.5% | +54.1% | +48.2%
+Staff training: +35.7% | 0.0% | 0.0%
+Staff taxi: +5.8% | 0.0% | 0.0%
+CSR: +130.7% | 0.0% | 0.0%
+National events: +20.0% | 0.0% | 0.0%
+Directors’ travel: +50.8% | 0.0% | 0.0%
+Staff medical insurance: +71.2% | +19.9% | +22.8%
+Recruitment professional fees: +69.0% | +24.0% | +26.5%
+Staff internet allowances: +58.6% | +6.0% | +7.7%
+Leased-line internet: +36.4% | +19.1% | +22.1%
+Payroll tax: +130.8% | 0.0% | 0.0%
+Legal: n/m | 0.0% | 0.0%
+Accounting/auditing: +9.6% | 0.0% | 0.0%
+Bank charges: +9.4% | 0.0% | 0.0%
+Telephones: +51.8% | 0.0% | 0.0%
+Fuel: +39.8% | 0.0% | 0.0%
+Fraud insurance: +10.1% | 0.0% | 0.0%
+Motor-vehicle lease: +4.7% | 0.0% | 0.0%
+
+n/m means the percentage is not meaningful because the prior-year value was zero. The dashboard revenue schedule covers TF+FA/QGCC; AI Digital is held in Tech Consolidated.`;
+
+function answerStrategy(question:string) {
+  const query = question.toLowerCase();
+  const asksAllChanges = query.includes("revenue") && (query.includes("expense") || query.includes("opex")) && (query.includes("change") || query.includes("%") || query.includes("percentage"));
+  if (asksAllChanges) return { text:"Complete year-on-year revenue and expense comparison", view:"financial-changes" as const, sources:["Budget Dashboard FY2026/27 · Revenue Breakdown", "Budget Dashboard FY2026/27 · Full OpEx Line-Item Breakdown"] };
+  const theme = strategyThemes.map(item => ({ item, score:item.keywords.reduce((score,key)=>score+(query.includes(key)?key.length:0),0) })).sort((a,b)=>b.score-a.score)[0];
+  if (theme?.score > 0) return { text:theme.item.answer, sources:theme.item.sources };
+  const matches = Object.values(drilldowns).map(item => {
+    const haystack = `${item.title} ${item.eyebrow} ${item.summary} ${item.assumption} ${item.action}`.toLowerCase();
+    const words = query.split(/\W+/).filter(word=>word.length>3);
+    return { item, score:words.reduce((score,word)=>score+(haystack.includes(word)?1:0),0) };
+  }).filter(match=>match.score>0).sort((a,b)=>b.score-a.score).slice(0,2);
+  if (!matches.length || matches[0].score < 2) return { text:"I don’t have enough grounded evidence to answer that confidently. Please narrow the question by naming the metric, entity or scope, and comparison period. I will not guess or fill gaps with unsupported information.", sources:[] };
+  const lead = matches[0].item;
+  const supporting = matches[1]?.item;
+  return { text:`${lead.title} is ${lead.value}. ${lead.summary} ${lead.assumption} Management response: ${lead.action}${supporting ? ` Related evidence: ${supporting.title} is ${supporting.value}.` : ""}`, sources:[lead.source, ...(supporting ? [supporting.source] : [])] };
+}
+
+function FinancialChangesView() {
+  const headings = ["REVENUE","PROFIT AND EXPENSE TOTALS","OPERATING EXPENSE ITEMS"];
+  const sections:{title:string;rows:{label:string;values:string[]}[]}[] = [];
+  let current:{title:string;rows:{label:string;values:string[]}[]} | null = null;
+  dashboardChangeAnswer.split("\n").forEach(line=>{
+    const clean=line.trim();
+    if(headings.includes(clean)){current={title:clean,rows:[]};sections.push(current);return;}
+    if(!current||!clean.includes(":"))return;
+    const [label,...rest]=clean.split(":");
+    current.rows.push({label,values:rest.join(":").trim().split(" | ")});
+  });
+  const tone=(value:string)=>value.startsWith("+")?"up":value.startsWith("−")||value.startsWith("-")?"down":"flat";
+  return <div className="financial-change-view">
+    <div className="change-summary">
+      <div><small>Total revenue</small><b>+18.1%</b><span>FY26/27</span></div>
+      <div><small>TF total</small><b>+48.2%</b><span>FY26/27</span></div>
+      <div><small>Total OpEx</small><b>+27.8%</b><span>FY26/27</span></div>
+    </div>
+    <div className="change-period-key"><span>Period 1<small>25/26→26/27</small></span><span>Period 2<small>26/27→27/28</small></span><span>Period 3<small>27/28→28/29</small></span></div>
+    {sections.map(section=><section className="change-section" key={section.title}><h3>{section.title}</h3><div className="change-table-wrap"><table><thead><tr><th>Line item</th><th>P1</th><th>P2</th><th>P3</th></tr></thead><tbody>{section.rows.map(row=><tr key={row.label}><td>{row.label}</td>{row.values.map((value,i)=><td key={i}><span className={tone(value)}>{value}</span></td>)}</tr>)}</tbody></table></div></section>)}
+    <p className="change-note"><b>n/m</b> means the prior-year value was zero. Dashboard revenue covers TF+FA/QGCC; AI Digital is held in Tech Consolidated.</p>
+  </div>;
+}
+
 export default function Home() {
   const [active, setActive] = useState("thesis");
   const [scenario, setScenario] = useState<"bear" | "expected" | "stretch">("expected");
@@ -70,6 +190,14 @@ export default function Home() {
   const [openKpi, setOpenKpi] = useState<string | null>(null);
   const [openSynergy, setOpenSynergy] = useState<string | null>(null);
   const [openSource, setOpenSource] = useState<number | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"I’m Alan, your Board evidence assistant. Ask me about the growth case, assumptions, KPIs, risks, priorities, people readiness or how the uploaded dashboard reconciles to the revised Board case. I’ll answer only from approved evidence and show the source."}]);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceStatus, setVoiceStatus] = useState("Ready for push-to-talk");
+  const recognitionRef = useRef<VoiceRecognition | null>(null);
+
   const scenarios = {
     bear: { adoption: "15%", clients: "~62", revenue: 1.1, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "The pricing model states this case remains above the fixed-cost break-even point." },
     expected: { adoption: "30%", clients: "124", revenue: 2.133705, gp: 1.16463, ebitda: 0.589545, profitability:"$590k EBITDA", note: "Budget case: 55 FA, 15 TF and 54 Backroom customers, phased through the year." },
@@ -95,6 +223,7 @@ export default function Home() {
       setOpenKpi(null);
       setOpenSynergy(null);
       setOpenSource(null);
+      setChatOpen(false);
     };
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Element | null;
@@ -145,6 +274,45 @@ export default function Home() {
     rows:([["Adoption rate",scenarios[scenario].adoption],["Clients converted",scenarios[scenario].clients],["Gross profit",scenarioReference.gp],["EBITDA",scenarioReference.ebitda]] as [string,string][]),
     assumption:"Eligible clients enter the funnel in phases: TF first, FA from September and Backroom from month 7 in the KPI budget model.", action:"Compare actual conversions, live customers, MRR and revenue per customer with this case every month.", source:"KPI Analysis · AI Digital adoption scenarios"
   } : selected ? drilldowns[selected] : null;
+
+  const askStrategy = (question = chatInput) => {
+    const clean = question.trim();
+    if (!clean) return;
+    const answer = answerStrategy(clean);
+    setChatMessages(messages=>[...messages,{role:"user",text:clean},{role:"assistant",text:answer.text,sources:answer.sources,view:"view" in answer?answer.view:undefined}]);
+    setChatInput("");
+    if (voiceEnabled && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const spoken = "view" in answer ? "I have prepared the complete year on year revenue and expense comparison as a structured table on screen." : answer.text;
+      const utterance = new SpeechSynthesisUtterance(spoken);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+  const toggleListening = () => {
+    if (isListening) { recognitionRef.current?.stop(); return; }
+    const voiceWindow = window as typeof window & {SpeechRecognition?:new()=>VoiceRecognition;webkitSpeechRecognition?:new()=>VoiceRecognition};
+    const Recognition = voiceWindow.SpeechRecognition || voiceWindow.webkitSpeechRecognition;
+    if (!Recognition) { setVoiceStatus("Voice input is not supported in this browser. You can still type your question."); return; }
+    const recognition = new Recognition();
+    recognition.lang = "en-AU";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.onresult = event => {
+      let transcript=""; let final=false;
+      for(let i=0;i<event.results.length;i++){transcript+=event.results[i][0].transcript;final=final||event.results[i].isFinal;}
+      setChatInput(transcript.trim());
+      setVoiceStatus(final?"Question captured":"Listening…");
+      if(final)askStrategy(transcript);
+    };
+    recognition.onerror = event => {setVoiceStatus(event.error==="not-allowed"?"Microphone access is blocked in this preview. Open the local site in Chrome or Edge and allow microphone access there.":"I couldn’t hear that clearly. Please try again.");setIsListening(false);};
+    recognition.onend = () => {setIsListening(false);recognitionRef.current=null;};
+    recognitionRef.current=recognition;
+    setIsListening(true);
+    setVoiceStatus("Listening…");
+    recognition.start();
+  };
 
   return <main>
     <header className="masthead">
@@ -413,6 +581,16 @@ export default function Home() {
         <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
       </div>
     </div>}
+    <button type="button" className="chat-launcher" onClick={()=>setChatOpen(true)} aria-label="Ask Alan"><span>A</span><b>Ask Alan</b></button>
+    {chatOpen && <div className="chat-scrim" onMouseDown={(event)=>{if(event.target===event.currentTarget)setChatOpen(false)}}>
+      <aside className="strategy-chat" role="dialog" aria-modal="true" aria-labelledby="strategy-chat-title">
+        <header><div><small>Alan · Board evidence assistant</small><h2 id="strategy-chat-title">Ask Alan</h2><p>Answers are limited to the approved board evidence.</p><div className="grounded-badge"><i/>Grounded mode · unsupported answers refused</div></div><div className="chat-head-actions"><button type="button" className={voiceEnabled?"voice-on":""} onClick={()=>{setVoiceEnabled(value=>!value);window.speechSynthesis?.cancel()}} aria-label={voiceEnabled?"Turn Alan’s voice off":"Turn Alan’s voice on"}>{voiceEnabled?"🔊":"🔇"}</button><button type="button" onClick={()=>setChatOpen(false)} aria-label="Close Alan">×</button></div></header>
+        <div className="chat-prompts" aria-label="Suggested questions">{["Why is this budget different?","How do $40.2M and $42.4M reconcile?","What could break the case?","How does culture support growth?"].map(prompt=><button key={prompt} type="button" onClick={()=>askStrategy(prompt)}>{prompt}</button>)}</div>
+        <div className="chat-thread" aria-live="polite">{chatMessages.map((message,index)=><article key={`${message.role}-${index}`} className={`${message.role}${message.view?" has-view":""}`}><small>{message.role==="assistant"?"Alan":"You"}</small>{message.view==="financial-changes"?<FinancialChangesView/>:<p>{message.text}</p>}{message.sources?.length?<div className="chat-sources"><b>Evidence</b>{message.sources.map(source=><span key={source}>{source}</span>)}</div>:null}</article>)}</div>
+        <form onSubmit={(event)=>{event.preventDefault();askStrategy()}}><label htmlFor="strategy-question">Ask Alan a board question</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder="Ask Alan by voice or type a question…" rows={2}/><button type="button" className={`mic-button${isListening?" listening":""}`} onClick={toggleListening} aria-label={isListening?"Stop Alan listening":"Ask Alan by voice"}>{isListening?"■":"●"}</button><button type="submit" disabled={!chatInput.trim()}>Ask →</button></div><span className="voice-status">{voiceStatus}</span><small>Alan local voice prototype · evidence build 2026-08-07.6 · use Chrome or Edge for microphone testing</small></form>
+      </aside>
+    </div>}
+    
     <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · FY2026–29 growth strategy</span></footer>
   </main>;
 }
