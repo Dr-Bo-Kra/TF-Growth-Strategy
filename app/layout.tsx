@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", images: ["/og.png"] },
   icons: {
-    icon: "/tf-logo-mark.png",
-    shortcut: "/tf-logo-mark.png",
+    icon: "/tf-logo-mark-v2.png",
+    shortcut: "/tf-logo-mark-v2.png",
   },
 };
 

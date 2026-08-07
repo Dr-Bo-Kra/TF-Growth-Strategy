@@ -99,7 +99,7 @@ export default function Home() {
 
   return <main>
     <header className="masthead">
-      <a className="wordmark" href="#thesis"><img src="./tf-logo-wide.png" alt="Talent Formula" /></a>
+      <a className="wordmark" href="#thesis"><img src="./tf-logo-wide-v2.png" alt="Talent Formula" /></a>
       <div className="confidential">Confidential · FY2026-27</div>
       <div className="header-actions"><button type="button" onClick={()=>setGrowthOpen(true)}>Growth case <span>+</span></button><a className="jump" href="#decisions">Board asks <span>↘</span></a></div>
     </header>
@@ -228,7 +228,7 @@ export default function Home() {
           ["Commission the downside case","Model -20% UK revenue, -15% FLA headcount and 15% AI adoption.","Next Board"],
         ].map(([title,copy,timing],i)=><article key={title}><span>{String(i+1).padStart(2,"0")}</span><h3>{title}</h3><p>{copy}</p><b>{timing}</b></article>)}
       </div>
-      <div className="close"><div><img src="./tf-logo-mark.png" alt="Talent Formula"/><b>FY2026-27 Board Plan</b></div><p>Scale the platform.<br/>Protect the downside.</p></div>
+      <div className="close"><div><img src="./tf-logo-mark-v2.png" alt="Talent Formula"/><b>FY2026-27 Board Plan</b></div><p>Scale the platform.<br/>Protect the downside.</p></div>
     </section>
     {currentDetail && <div className="drawer-layer" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setSelected(null)}}>
       <aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
