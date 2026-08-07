@@ -15,6 +15,7 @@ import "./synergy-realisation.css";
 import "./presentation-scale.css";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { bindPresentationScale } from "./presentation-scale";
 
 const nav = [
   ["thesis", "01", "Thesis"], ["trajectory", "02", "Trajectory"],
@@ -81,6 +82,8 @@ export default function Home() {
     nav.forEach(([id]) => { const el = document.getElementById(id); if (el) observer.observe(el); });
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => bindPresentationScale(100), []);
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
