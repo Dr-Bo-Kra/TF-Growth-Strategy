@@ -207,11 +207,11 @@ export default function Home() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"I’m Alan, your Board evidence assistant. Ask me about the growth case, assumptions, KPIs, risks, priorities, people readiness or how the uploaded dashboard reconciles to the revised Board case. I’ll answer only from approved evidence and show the source."}]);
   const [isListening, setIsListening] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceStatus, setVoiceStatus] = useState("Ready for push-to-talk");
-  const recognitionRef = useRef<VoiceRecognition | null>(null);
-  const voiceTranscriptRef = useRef("");
-  const voiceSessionActiveRef = useRef(false);
-  const submitOnVoiceEndRef = useRef(false);
+  const [voiceStatus, setVoiceStatus] = useState("Ready for a realtime conversation");
+  const realtimePeerRef = useRef<RTCPeerConnection | null>(null);
+  const realtimeChannelRef = useRef<RTCDataChannel | null>(null);
+  const realtimeStreamRef = useRef<MediaStream | null>(null);
+  const realtimeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const scenarios = {
     bear: { adoption: "15%", clients: "~62", revenue: 1.1, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "The pricing model states this case remains above the fixed-cost break-even point." },
@@ -310,60 +310,80 @@ export default function Home() {
       window.speechSynthesis.speak(utterance);
     }
   };
-  const toggleListening = () => {
-    if (isListening) {
-      voiceSessionActiveRef.current = false;
-      submitOnVoiceEndRef.current = true;
-      setVoiceStatus("Finishing your question…");
-      recognitionRef.current?.stop();
+  const stopRealtimeVoice = () => {
+    realtimeChannelRef.current?.close();
+    realtimePeerRef.current?.close();
+    realtimeStreamRef.current?.getTracks().forEach(track => track.stop());
+    if (realtimeAudioRef.current) realtimeAudioRef.current.srcObject = null;
+    realtimeChannelRef.current = null;
+    realtimePeerRef.current = null;
+    realtimeStreamRef.current = null;
+    realtimeAudioRef.current = null;
+    setIsListening(false);
+    setVoiceStatus("Realtime conversation ended");
+  };
+
+  const toggleListening = async () => {
+    if (isListening) { stopRealtimeVoice(); return; }
+    if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined") {
+      setVoiceStatus("Realtime voice requires a current version of Chrome, Edge or Safari.");
       return;
     }
-    const voiceWindow = window as typeof window & {SpeechRecognition?:new()=>VoiceRecognition;webkitSpeechRecognition?:new()=>VoiceRecognition};
-    const Recognition = voiceWindow.SpeechRecognition || voiceWindow.webkitSpeechRecognition;
-    if (!Recognition) { setVoiceStatus("Voice input is not supported in this browser. You can still type your question."); return; }
-    const recognition = new Recognition();
-    recognition.lang = "en-AU";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    voiceTranscriptRef.current = "";
-    submitOnVoiceEndRef.current = false;
-    voiceSessionActiveRef.current = true;
-    recognition.onresult = event => {
-      let transcript = "";
-      for (let i=0;i<event.results.length;i++) transcript += event.results[i][0].transcript;
-      voiceTranscriptRef.current = transcript.trim();
-      setChatInput(voiceTranscriptRef.current);
-      setVoiceStatus("Listening — tap stop when you have finished");
-    };
-    recognition.onerror = event => {
-      if (event.error === "not-allowed") {
-        voiceSessionActiveRef.current = false;
-        setVoiceStatus("Microphone access is blocked. Open the site in Chrome or Edge and allow microphone access.");
-      } else if (event.error !== "no-speech") {
-        voiceSessionActiveRef.current = false;
-        setVoiceStatus("I couldn’t hear that clearly. Please try again.");
-      }
-      setIsListening(voiceSessionActiveRef.current);
-    };
-    recognition.onend = () => {
-      if (voiceSessionActiveRef.current) {
-        setVoiceStatus("Still listening — take your time");
-        window.setTimeout(() => { try { recognition.start(); } catch {} }, 250);
-        return;
-      }
-      setIsListening(false);
-      recognitionRef.current = null;
-      const captured = voiceTranscriptRef.current.trim();
-      if (submitOnVoiceEndRef.current && captured) {
-        submitOnVoiceEndRef.current = false;
-        setVoiceStatus("Question captured");
-        askStrategy(captured);
-      }
-    };
-    recognitionRef.current = recognition;
-    setIsListening(true);
-    setVoiceStatus("Listening — tap stop when you have finished");
-    recognition.start();
+    setVoiceStatus("Connecting securely to Alan…");
+    try {
+      const tokenResponse = await fetch("https://xryrekfeuknlqmidekww.supabase.co/functions/v1/alan-realtime-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      const tokenData = await tokenResponse.json();
+      if (!tokenResponse.ok || !tokenData.value) throw new Error(tokenData.error || "Unable to create a realtime session");
+
+      const peer = new RTCPeerConnection();
+      const remoteAudio = new Audio();
+      remoteAudio.autoplay = true;
+      peer.ontrack = event => { remoteAudio.srcObject = event.streams[0]; };
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      });
+      stream.getTracks().forEach(track => peer.addTrack(track, stream));
+
+      const channel = peer.createDataChannel("oai-events");
+      channel.addEventListener("open", () => {
+        setIsListening(true);
+        setVoiceStatus("Alan is listening — speak naturally and take your time");
+      });
+      channel.addEventListener("message", event => {
+        const message = JSON.parse(event.data) as {type?:string;transcript?:string;error?:{message?:string}};
+        if (message.type === "input_audio_buffer.speech_started") setVoiceStatus("Listening…");
+        if (message.type === "input_audio_buffer.speech_stopped") setVoiceStatus("Alan is thinking…");
+        if (message.type === "conversation.item.input_audio_transcription.completed" && message.transcript?.trim()) {
+          setChatMessages(items => [...items, { role:"user", text:message.transcript!.trim() }]);
+        }
+        if (message.type === "response.output_audio_transcript.done" && message.transcript?.trim()) {
+          setChatMessages(items => [...items, { role:"assistant", text:message.transcript!.trim(), sources:["Alan realtime session · approved Board evidence pack"] }]);
+        }
+        if (message.type === "response.done") setVoiceStatus("Alan is listening — you can continue");
+        if (message.type === "error") setVoiceStatus(message.error?.message || "Alan’s realtime session encountered an error");
+      });
+      channel.addEventListener("close", () => setIsListening(false));
+
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+      const sdpResponse = await fetch("https://api.openai.com/v1/realtime/calls", {
+        method: "POST",
+        body: offer.sdp,
+        headers: { Authorization: `Bearer ${tokenData.value}`, "Content-Type": "application/sdp" }
+      });
+      if (!sdpResponse.ok) throw new Error("OpenAI could not establish the realtime audio connection");
+      await peer.setRemoteDescription({ type:"answer", sdp:await sdpResponse.text() });
+      realtimePeerRef.current = peer;
+      realtimeChannelRef.current = channel;
+      realtimeStreamRef.current = stream;
+      realtimeAudioRef.current = remoteAudio;
+    } catch (error) {
+      stopRealtimeVoice();
+      setVoiceStatus(error instanceof Error ? error.message : "Unable to start realtime voice");
+    }
   };
 
   return <main>
@@ -639,7 +659,7 @@ export default function Home() {
         <header><div><small>Alan · Board evidence assistant</small><h2 id="strategy-chat-title">Ask Alan</h2><p>Answers are limited to the approved board evidence.</p><div className="grounded-badge"><i/>Grounded mode · unsupported answers refused</div></div><div className="chat-head-actions"><button type="button" className={voiceEnabled?"voice-on":""} onClick={()=>{setVoiceEnabled(value=>!value);window.speechSynthesis?.cancel()}} aria-label={voiceEnabled?"Turn Alan’s voice off":"Turn Alan’s voice on"}>{voiceEnabled?"🔊":"🔇"}</button><button type="button" onClick={()=>setChatOpen(false)} aria-label="Close Alan">×</button></div></header>
         <div className="chat-prompts" aria-label="Suggested questions">{["Why is this budget different?","How do $40.2M and $42.4M reconcile?","What could break the case?","How does culture support growth?"].map(prompt=><button key={prompt} type="button" onClick={()=>askStrategy(prompt)}>{prompt}</button>)}</div>
         <div className="chat-thread" aria-live="polite">{chatMessages.map((message,index)=><article key={`${message.role}-${index}`} className={`${message.role}${message.view?" has-view":""}`}><small>{message.role==="assistant"?"Alan":"You"}</small>{message.view==="financial-changes"?<FinancialChangesView/>:<p>{message.text}</p>}{message.sources?.length?<div className="chat-sources"><b>Evidence</b>{message.sources.map(source=><span key={source}>{source}</span>)}</div>:null}</article>)}</div>
-        <form onSubmit={(event)=>{event.preventDefault();askStrategy()}}><label htmlFor="strategy-question">Ask Alan a board question</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder="Ask Alan by voice or type a question…" rows={2}/><button type="button" className={`mic-button${isListening?" listening":""}`} onClick={toggleListening} aria-label={isListening?"Stop Alan listening":"Ask Alan by voice"}>{isListening?"■":"●"}</button><button type="submit" disabled={!chatInput.trim()}>Ask →</button></div><span className="voice-status">{voiceStatus}</span><small>Alan local voice prototype · evidence build 2026-08-07.6 · use Chrome or Edge for microphone testing</small></form>
+        <form onSubmit={(event)=>{event.preventDefault();askStrategy()}}><label htmlFor="strategy-question">Ask Alan a board question</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder="Ask Alan by voice or type a question…" rows={2}/><button type="button" className={`mic-button${isListening?" listening":""}`} onClick={toggleListening} aria-label={isListening?"End Alan realtime conversation":"Start a realtime voice conversation with Alan"}>{isListening?"■":"●"}</button><button type="submit" disabled={!chatInput.trim()}>Ask →</button></div><span className="voice-status">{voiceStatus}</span><small>Alan realtime voice · grounded in approved Board evidence · press stop to end the conversation</small></form>
       </aside>
     </div>}
     
