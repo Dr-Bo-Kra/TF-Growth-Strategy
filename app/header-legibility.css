@@ -3,17 +3,28 @@
 .math-stack strong{font-size:44px!important}
 .risk-title>b{font-size:28px!important;line-height:1.15!important}
 .decision-list h3{font-size:24px!important;line-height:1.2!important}
-.force-grid article>b{font-size:28px!important;line-height:1.15!important}
+.force-grid article>b{font-size:26px!important;line-height:1.15!important}
 .difference-hero h4{font-size:32px!important;line-height:1.08!important}
 .difference-grid h4{font-size:25px!important;line-height:1.14!important}
-.difference-grid small{font-size:12px!important;line-height:1.2!important;font-weight:900!important;letter-spacing:.11em!important;color:#aebbd0!important}
-.market-grid small,.moat-selector small,.moat-stage-head small,.moat-stage-grid small,.priority-detail small,.risk-response small{font-size:11px!important;line-height:1.25!important;font-weight:900!important}
-.difference-hero small,.difference-bottom small{font-size:10px!important;line-height:1.25!important}
 .moat-selector b{font-size:22px!important;line-height:1.15!important}
 .moat-stage-head h4{font-size:36px!important;line-height:1.08!important}
-.priority-summary h4{font-size:28px!important;line-height:1.1!important}
-.priority-evidence-list>article.open .priority-summary h4{font-size:36px!important}
-.risk-summary h4{font-size:26px!important;line-height:1.15!important}
+.priority-summary h4{font-size:25px!important;line-height:1.12!important}
+.priority-evidence-list>article.open .priority-summary h4{font-size:34px!important}
+.risk-summary h4{font-size:24px!important;line-height:1.15!important}
 .deep-risk-grid h4{font-size:24px!important;line-height:1.15!important}
 .drawer-head h2{font-size:42px!important;line-height:1.04!important}
-@media(max-width:620px){.engine h3{font-size:31px!important}.difference-hero h4{font-size:27px!important}.difference-grid h4,.risk-summary h4{font-size:22px!important}.difference-grid small{font-size:11px!important}.priority-summary h4{font-size:25px!important}.drawer-head h2{font-size:34px!important}}
+.kpi-hover-window h3{font-size:26px!important;line-height:1.15!important}
+.synergy-card aside h3{font-size:24px!important;line-height:1.15!important}
+.synergy-card .synergy-main>p{font-size:14px!important;line-height:1.3!important}
+
+@media(min-width:1200px){
+  .force-grid article>b,.difference-grid h4,.priority-summary h4,.risk-summary h4,.deep-risk-grid h4,.decision-list h3{font-size:26px!important}
+  .moat-selector b{font-size:23px!important}
+}
+
+@media(max-width:620px){
+  .engine h3{font-size:31px!important}
+  .difference-hero h4{font-size:27px!important}
+  .difference-grid h4,.risk-summary h4,.priority-summary h4,.decision-list h3{font-size:23px!important}
+  .drawer-head h2{font-size:34px!important}
+}

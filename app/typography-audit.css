@@ -1,27 +1,58 @@
-/* Consolidated boardroom legibility pass across every page, tab and expansion. */
-.confidential,.header-actions>button,.jump{font-size:11px!important}
-.rail a,.kicker,.chapter-label p{font-size:12px!important}
-.signal-row span,.ns-top,.north-star>p,.ns-rule span,.margin span{font-size:11px!important}
-.bars button span,.year>b,.year>small,.legend,.math-stack small{font-size:11px!important}
-.data-note,.market-note,.difference-source,.drawer-source{font-size:10px!important;line-height:1.5!important}
-.engine>div>span{font-size:12px!important}.engine dt{font-size:11px!important}.engine dd,.engine dd .drill{font-size:13px!important}
-.flywheel{font-size:11px!important}
-.growth-entry span,.growth-entry i{font-size:11px!important}
-.scenario-tabs button,.scenario-lead span,.scenario-note b,.pricing>span{font-size:11px!important}
-.scenario-lead p,.pricing small,.scenario-stat small{font-size:11px!important}
-.risk-title small,.risk-register p,.synergy-strip>div small,.synergy-strip>span{font-size:11px!important}
-.risk-register article b,.synergy-strip>span b,.close b{font-size:12px!important}
-.risk-register em,.deep-risk-grid em,.risk-summary em{font-size:10px!important}
-.decision-list article>b{font-size:11px!important}
-.growth-head small,.growth-title>small{font-size:12px!important;line-height:1.25!important}
-.timing-strip b{font-size:11px!important}
-.market-hero>div span{font-size:11px!important}
-.moat-proof,.priority-summary>b{font-size:11px!important}
-.moat-stage-head small,.moat-stage-grid small,.priority-detail small,.risk-response small{font-size:12px!important}
-.difference-hero small,.difference-bottom small{font-size:12px!important}
-.difference-hero>p{font-size:12px!important;line-height:1.55!important}
-.source-trigger{font-size:11px!important}.source-window>div small,.source-window dt,.source-window em{font-size:10px!important}.source-window dd{font-size:11px!important}
-.drawer-head small,.drawer-callout small,.drawer-action small{font-size:11px!important}
-.drawer-rows span{font-size:11px!important}.drawer-rows b{font-size:17px!important}
-.growth-foot,.growth-foot button{font-size:10px!important}
-@media(max-width:620px){.rail a,.kicker,.chapter-label p{font-size:11px!important}.growth-head small,.growth-title>small{font-size:11px!important}.scenario-tabs button{font-size:10px!important}}
+/* Consolidated boardroom legibility pass: labels, badges, sources — never crush body hierarchy. */
+
+/* Uppercase category labels: 12–13px */
+.confidential,.header-actions>button,.jump{font-size:12px!important}
+.rail a,.kicker,.chapter-label p{font-size:12px!important;letter-spacing:.12em!important}
+.signal-row span,.ns-top,.ns-rule span,.margin span{font-size:12px!important}
+.north-star>p{font-size:14px!important;line-height:1.45!important}
+.bars button span,.year>b,.year>small,.legend,.math-stack small{font-size:12px!important}
+.engine>div>span{font-size:12px!important;letter-spacing:.12em!important}
+.engine dt{font-size:12px!important}.engine dd,.engine dd .drill{font-size:14px!important}
+.flywheel{font-size:12px!important}
+.growth-entry span,.growth-entry i{font-size:12px!important}
+.scenario-tabs button,.scenario-lead span,.scenario-note b,.pricing>span{font-size:12px!important}
+.scenario-lead p,.pricing small,.scenario-stat small{font-size:12px!important}
+.risk-title small,.synergy-strip>div small,.synergy-strip>span{font-size:12px!important}
+.risk-register article b,.synergy-strip>span b,.close b{font-size:13px!important}
+.decision-list article>b{font-size:12px!important}
+.growth-head small,.growth-title>small{font-size:12px!important;line-height:1.25!important;letter-spacing:.12em!important}
+.timing-strip b{font-size:12px!important}
+.market-hero>div span{font-size:12px!important}
+.moat-proof,.priority-summary>b{font-size:12px!important}
+.moat-stage-head small,.moat-stage-grid small,.priority-detail small,.risk-response small{font-size:12px!important;letter-spacing:.1em!important;color:#b7c4d6!important}
+.difference-hero small,.difference-bottom small,.difference-grid small{font-size:12px!important;letter-spacing:.1em!important}
+.difference-grid small{color:#b7c4d6!important}
+.market-grid small,.moat-selector small{font-size:12px!important;letter-spacing:.1em!important;color:#b7c4d6!important}
+.moat-selector button.active small{color:#70300d!important}
+.drawer-head small,.drawer-callout small,.drawer-action small{font-size:12px!important}
+.drawer-rows span{font-size:12px!important}.drawer-rows b{font-size:17px!important}
+.kpi-hover-window header small,.kpi-playbook small,.kpi-escalation>span{font-size:12px!important;letter-spacing:.1em!important}
+.kpi-hover-window dt{font-size:11px!important;letter-spacing:.08em!important;color:#b0bdd0!important}
+.synergy-total>small,.synergy-owner small,.synergy-governance>b,.synergy-card aside header small,.synergy-card aside dt{font-size:12px!important;letter-spacing:.1em!important}
+.synergy-metrics .synergy-share small,.synergy-share small{font-size:11px!important;letter-spacing:.06em!important}
+.synergy-total span{font-size:12px!important;line-height:1.4!important;color:#c2cede!important}
+
+/* Risk status badges: 10–11px */
+.risk-register em,.deep-risk-grid em,.risk-summary em{font-size:11px!important;letter-spacing:.04em!important}
+
+/* Supporting source/reference text: never below 12px */
+.data-note,.market-note,.difference-source,.drawer-source{font-size:12px!important;line-height:1.5!important}
+.source-trigger{font-size:12px!important;line-height:1.45!important}
+.source-window>div small,.source-window dt,.source-window em{font-size:12px!important;line-height:1.4!important}
+.source-window dd{font-size:12px!important;line-height:1.45!important}
+.growth-foot,.growth-foot button{font-size:12px!important}
+footer{font-size:11px!important}
+
+@media(min-width:1200px){
+  .rail a,.kicker,.chapter-label p,.engine>div>span,.growth-head small,.growth-title>small,
+  .moat-stage-head small,.moat-stage-grid small,.priority-detail small,.risk-response small,
+  .difference-hero small,.difference-bottom small,.difference-grid small,.market-grid small,.moat-selector small,
+  .kpi-hover-window header small,.synergy-total>small,.synergy-governance>b{font-size:13px!important}
+  .risk-register em,.deep-risk-grid em,.risk-summary em{font-size:11px!important}
+}
+
+@media(max-width:620px){
+  .rail a,.kicker,.chapter-label p{font-size:12px!important}
+  .growth-head small,.growth-title>small{font-size:12px!important}
+  .scenario-tabs button{font-size:11px!important}
+}

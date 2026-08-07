@@ -63,6 +63,9 @@ export default function Home() {
   const [riskOpen, setRiskOpen] = useState<string | null>("FLA headcount scale-up");
   const [priorityOpen, setPriorityOpen] = useState<string | null>("Integrate Frontline Accounting");
   const [moatOpen, setMoatOpen] = useState("Accounting specialisation");
+  const [openKpi, setOpenKpi] = useState<string | null>(null);
+  const [openSynergy, setOpenSynergy] = useState<string | null>(null);
+  const [openSource, setOpenSource] = useState<number | null>(null);
   const scenarios = {
     bear: { adoption: "15%", clients: "~62", revenue: 1.1, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "The pricing model states this case remains above the fixed-cost break-even point." },
     expected: { adoption: "30%", clients: "124", revenue: 2.133705, gp: 1.16463, ebitda: 0.589545, profitability:"$590k EBITDA", note: "Budget case: 55 FA, 15 TF and 54 Backroom customers, phased through the year." },
@@ -79,10 +82,28 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); } };
+    const close = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setSelected(null);
+      setGrowthOpen(false);
+      setOpenKpi(null);
+      setOpenSynergy(null);
+      setOpenSource(null);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (!target?.closest?.(".kpi-control")) setOpenKpi(null);
+      if (!target?.closest?.(".synergy-card")) setOpenSynergy(null);
+      if (!target?.closest?.(".source-hover")) setOpenSource(null);
+    };
     window.addEventListener("keydown", close);
+    document.addEventListener("pointerdown", onPointerDown);
     document.body.style.overflow = selected || growthOpen ? "hidden" : "";
-    return () => { window.removeEventListener("keydown", close); document.body.style.overflow = ""; };
+    return () => {
+      window.removeEventListener("keydown", close);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.body.style.overflow = "";
+    };
   }, [selected, growthOpen]);
 
   const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${id === "ai-scenario" ? `${scenario} AI Digital scenario` : drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
@@ -176,11 +197,27 @@ export default function Home() {
         <div className="kpi-board">
           {[ ["Client retention",">92%","client-retention"],["FLA turnover","<18%","fla-turnover"],["FLA billing utilisation",">88%","billing-utilisation"],["Proposal win rate",">40%","win-rate"],["Pipeline coverage","1.5×","pipeline"],["GP per FLA FTE","$10.2k","gp-fla"],["GP per TF FTE","$22.1k","gp-tf"],["FA managed NRR",">104%","nrr-fa"],["AI Digital NRR",">115%","nrr-ai"],["Time to recruit","<28 days","time-to-recruit"],["AI active customers","124","ai-active-customers"],["AI run-rate MRR","$242k","ai-mrr"] ].map(([label,value,id],i)=>{
             const detail = drilldowns[id as keyof typeof drilldowns];
-            return <article className="kpi-control" key={label} tabIndex={0} aria-describedby={`kpi-detail-${id}`}>
+            const isOpen = openKpi === id;
+            return <article
+              className={`kpi-control${isOpen ? " is-open" : ""}`}
+              key={label}
+              tabIndex={0}
+              role="button"
+              aria-expanded={isOpen}
+              aria-controls={`kpi-detail-${id}`}
+              onClick={() => setOpenKpi(isOpen ? null : id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setOpenKpi(isOpen ? null : id);
+                }
+              }}
+            >
               <span className="kpi-no">{String(i+1).padStart(2,"0")}</span>
               <p className="kpi-name">{label}</p>
               <b className="kpi-target">{value}</b>
-              <aside className="kpi-hover-window" id={`kpi-detail-${id}`} role="tooltip">
+              <aside className="kpi-hover-window" id={`kpi-detail-${id}`} role="dialog" aria-label={`${label} detail`} onClick={(event)=>event.stopPropagation()}>
+                <button type="button" className="panel-close" aria-label="Close KPI detail" onClick={(event)=>{event.stopPropagation(); setOpenKpi(null);}}>×</button>
                 <header><div><small>{detail.eyebrow}</small><h3>Rationale and control</h3></div><strong>{detail.value}</strong></header>
                 <p><b>Why this threshold:</b> {detail.summary}</p>
                 <dl>{detail.rows.map(([term,description])=><div key={term}><dt>{term}</dt><dd>{description}</dd></div>)}</dl>
@@ -207,11 +244,30 @@ export default function Home() {
           ["03","Facilities","$240k","15%","COO","Sequence footprint consolidation after operating milestones so savings do not constrain delivery."],
           ["04","AI cross-sell","$336k","20%","AI GM / CCO","Convert existing relationships into active AI subscriptions and report recurring gross profit realised."],
           ["05","Procurement + recruitment","$274k","17%","CPO / CFO","Combine vendor buying power and internal recruitment capability; track avoided agency and supplier cost."],
-        ].map(([no,label,amount,share,owner,execution])=><article className="synergy-card" key={label} tabIndex={0}>
-          <span className="synergy-no">{no}</span><div className="synergy-main"><p>{label}</p><div className="synergy-metrics"><strong>{amount}</strong><b className="synergy-share">{share}<small>of register</small></b></div></div>
-          <div className="synergy-owner"><small>Proposed owner</small>{owner}</div>
-          <aside role="tooltip"><header><small>{share} of annual register</small><strong>{amount}</strong></header><h3>{label}</h3><p>{execution}</p><dl><div><dt>Evidence</dt><dd>Monthly realised-versus-plan</dd></div><div><dt>Governance</dt><dd>Owner sign-off in Board pack</dd></div></dl><footer>Source: Executive analysis · Synergy register</footer></aside>
-        </article>)}</div>
+        ].map(([no,label,amount,share,owner,execution])=>{
+          const isOpen = openSynergy === label;
+          return <article
+            className={`synergy-card${isOpen ? " is-open" : ""}`}
+            key={label}
+            tabIndex={0}
+            role="button"
+            aria-expanded={isOpen}
+            onClick={() => setOpenSynergy(isOpen ? null : label)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setOpenSynergy(isOpen ? null : label);
+              }
+            }}
+          >
+            <span className="synergy-no">{no}</span><div className="synergy-main"><p>{label}</p><div className="synergy-metrics"><strong>{amount}</strong><b className="synergy-share">{share}<small>of register</small></b></div></div>
+            <div className="synergy-owner"><small>Proposed owner</small>{owner}</div>
+            <aside role="dialog" aria-label={`${label} synergy detail`} onClick={(event)=>event.stopPropagation()}>
+              <button type="button" className="panel-close" aria-label="Close synergy detail" onClick={(event)=>{event.stopPropagation(); setOpenSynergy(null);}}>×</button>
+              <header><small>{share} of annual register</small><strong>{amount}</strong></header><h3>{label}</h3><p>{execution}</p><dl><div><dt>Evidence</dt><dd>Monthly realised-versus-plan</dd></div><div><dt>Governance</dt><dd>Owner sign-off in Board pack</dd></div></dl><footer>Source: Executive analysis · Synergy register</footer>
+            </aside>
+          </article>;
+        })}</div>
         <div className="synergy-governance"><b>Board control</b><p>Report each line monthly as <strong>planned · committed · realised</strong>; do not allow unrealised synergies to mask entity performance.</p></div>
       </div>
     </section>
@@ -290,7 +346,7 @@ export default function Home() {
               ["Enter the US","Use the accountant shortage and India delivery base to win the first client.","$1M by FY27/28","The US provides the largest expansion runway and lets the group reuse its recruitment, offshore-delivery and accounting-specialisation capabilities rather than build a new engine.","Executive analysis · Sections 03, 05, 06 and 14","The U.S. Bureau of Labor Statistics projects about 124,200 accountant and auditor openings annually from 2024-2034, with demand supported by complexity and globalisation.","U.S. BLS · Accountants and Auditors Outlook","https://www.bls.gov/ooh/business-and-financial/accountants-and-auditors.htm"],
               ["Expand EBITDA","Move from 9.3% to 12.3% in FY26/27, then beyond 23%.","Pre/post-synergy bridge","Revenue growth alone does not validate the model. Margin expansion proves FA operating leverage, AI economics and integration benefits are compounding as intended.","Executive analysis · Sections 05, 07 and 15","McKinsey research on large deals highlights persistent synergy governance and financial transparency as core conditions for converting strategic ambition into measurable value.","McKinsey · Keys to success in a large-deal merger","https://www.mckinsey.com/capabilities/m-and-a/our-insights/post-close-excellence-in-large-deal-m-and-a"],
               ["Build leadership","Create entity P&L ownership and management capacity for a $72M group.","Clear accountable owners","A business scaling across three entities, acquisitions and geographies will outrun informal decision-making. Leadership capacity is the control system for every other priority.","Executive analysis · Sections 05, 10, 11 and 14","McKinsey's integration research links tailored leadership capability-building with stronger planning, value capture, cultural integration and readiness for the next growth horizon.","McKinsey · The role of leadership in merger integration","https://www.mckinsey.com/capabilities/people-and-organizational-performance/our-insights/equipping-leaders-for-merger-integration-success"]
-            ].map(([title,copy,proof,why,internalRef,evidence,source,url],i)=><article key={title} className={priorityOpen===title?"open":""}><button type="button" className="priority-summary" onClick={()=>setPriorityOpen(priorityOpen===title?null:title)} aria-expanded={priorityOpen===title}><span>{String(i+1).padStart(2,"0")}</span><div><h4>{title}</h4><p>{copy}</p></div><b>{proof}</b><i>{priorityOpen===title?"−":"+"}</i></button>{priorityOpen===title&&<div className="priority-detail"><div className="why"><small>Why it is important</small><p>{why}</p></div><div><small>Internal reference</small><p>{internalRef}</p></div><div className="evidence"><small>External evidence</small><p>{evidence}</p><div className="source-hover"><button type="button" className="source-trigger" aria-describedby={`source-${i}`}>{source} <span>ⓘ</span></button><aside id={`source-${i}`} className="source-window" role="tooltip"><div><small>Reference preview</small><b>{source}</b></div><p>{evidence}</p><dl><dt>Publisher</dt><dd>{source.split(" · ")[0]}</dd><dt>Source address</dt><dd>{url}</dd></dl><em>This reference is shown inside the board plan. No new tab will open.</em></aside></div></div></div>}</article>)}
+            ].map(([title,copy,proof,why,internalRef,evidence,source,url],i)=><article key={title} className={priorityOpen===title?"open":""}><button type="button" className="priority-summary" onClick={()=>setPriorityOpen(priorityOpen===title?null:title)} aria-expanded={priorityOpen===title}><span>{String(i+1).padStart(2,"0")}</span><div><h4>{title}</h4><p>{copy}</p></div><b>{proof}</b><i>{priorityOpen===title?"−":"+"}</i></button>{priorityOpen===title&&<div className="priority-detail"><div className="why"><small>Why it is important</small><p>{why}</p></div><div><small>Internal reference</small><p>{internalRef}</p></div><div className="evidence"><small>External evidence</small><p>{evidence}</p><div className={`source-hover${openSource===i?" is-open":""}`}><button type="button" className="source-trigger" aria-expanded={openSource===i} aria-controls={`source-${i}`} onClick={(event)=>{event.stopPropagation(); setOpenSource(openSource===i?null:i);}}>{source} <span>ⓘ</span></button><aside id={`source-${i}`} className="source-window" role="dialog" aria-label="Reference preview" onClick={(event)=>event.stopPropagation()}><button type="button" className="panel-close" aria-label="Close reference preview" onClick={(event)=>{event.stopPropagation(); setOpenSource(null);}}>×</button><div><small>Reference preview</small><b>{source}</b></div><p>{evidence}</p><dl><dt>Publisher</dt><dd>{source.split(" · ")[0]}</dd><dt>Source address</dt><dd>{url}</dd></dl><em>This reference is shown inside the board plan. No new tab will open.</em></aside></div></div></div>}</article>)}
           </div></section>}
           {growthTab==="risks" && <section className="growth-risks"><div className="growth-title"><small>Risk-adjusted growth</small><h3>Ambition with<br/><em>explicit controls.</em></h3><p>The case remains investable only if the Board sees the downside early and management has predetermined responses.</p></div><div className="risk-response-list">
             {[

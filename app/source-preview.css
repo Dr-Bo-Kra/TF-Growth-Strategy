@@ -1,1 +1,29 @@
-.source-hover{position:relative;width:max-content;max-width:100%}.source-trigger{border:0;background:transparent;color:var(--orange);padding:0;font-size:8px;line-height:1.4;text-align:left;font-weight:900;cursor:help}.source-trigger span{margin-left:4px}.source-trigger:focus-visible{outline:2px solid var(--orange);outline-offset:3px}.source-window{position:absolute;z-index:20;left:0;bottom:calc(100% + 12px);width:min(430px,70vw);background:var(--paper);color:var(--ink);border:1px solid #cfc8b8;box-shadow:0 18px 50px rgba(0,0,0,.32);padding:20px;opacity:0;visibility:hidden;transform:translateY(7px);transition:.18s;pointer-events:none}.source-window:after{content:"";position:absolute;left:22px;bottom:-7px;width:12px;height:12px;background:var(--paper);border-right:1px solid #cfc8b8;border-bottom:1px solid #cfc8b8;transform:rotate(45deg)}.source-hover:hover .source-window,.source-hover:focus-within .source-window{opacity:1;visibility:visible;transform:none}.source-window>div small{display:block;color:var(--orange);text-transform:uppercase;letter-spacing:.13em;font-size:7px;font-weight:900}.source-window>div b{display:block;font-family:Georgia,serif;font-size:18px;color:var(--navy);margin-top:7px}.source-window>p{color:var(--muted)!important;font-size:10px!important;line-height:1.55!important;margin:14px 0!important}.source-window dl{border-top:1px solid var(--line);padding-top:10px;margin:0;display:grid;grid-template-columns:90px 1fr;gap:7px}.source-window dt{font-size:7px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.source-window dd{font-size:8px;margin:0;color:var(--navy);overflow-wrap:anywhere}.source-window em{display:block;font-style:normal;font-size:7px;color:#92958f;margin-top:13px}.priority-detail .evidence{overflow:visible}@media(max-width:620px){.source-window{position:fixed;left:16px;right:16px;bottom:70px;width:auto}.source-window:after{display:none}}
+.source-hover{position:relative;width:max-content;max-width:100%}
+.source-trigger{border:0;background:transparent;color:var(--orange);padding:0;font-size:8px;line-height:1.4;text-align:left;font-weight:900;cursor:pointer}
+.source-trigger span{margin-left:4px}
+.source-trigger:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.source-window{position:fixed;z-index:90;left:14px;right:14px;bottom:14px;width:auto;max-width:min(430px,calc(100vw - 28px));max-height:min(70vh,calc(100vh - 28px));margin:0 auto;overflow:auto;background:var(--paper);color:var(--ink);border:1px solid #cfc8b8;box-shadow:0 18px 50px rgba(0,0,0,.32);padding:20px;opacity:0;visibility:hidden;transform:translateY(7px);transition:.18s;pointer-events:none}
+.source-window:after{display:none}
+.source-window .panel-close{position:absolute;right:12px;top:12px;width:30px;height:30px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--navy);font-size:18px;cursor:pointer}
+.source-hover.is-open .source-window,.source-hover:focus-within .source-window{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+@media (hover:hover) and (pointer:fine){
+  .source-hover:hover .source-window{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+}
+.source-window>div small{display:block;color:var(--orange);text-transform:uppercase;letter-spacing:.13em;font-size:7px;font-weight:900}
+.source-window>div b{display:block;font-family:Georgia,serif;font-size:18px;color:var(--navy);margin-top:7px;padding-right:28px}
+.source-window>p{color:var(--muted)!important;font-size:10px!important;line-height:1.55!important;margin:14px 0!important}
+.source-window dl{border-top:1px solid var(--line);padding-top:10px;margin:0;display:grid;grid-template-columns:90px 1fr;gap:7px}
+.source-window dt{font-size:7px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.source-window dd{font-size:8px;margin:0;color:var(--navy);overflow-wrap:anywhere}
+.source-window em{display:block;font-style:normal;font-size:7px;color:#92958f;margin-top:13px}
+.priority-detail .evidence{overflow:visible}
+@media(min-width:721px){
+  .source-window{left:auto;right:max(18px,4vw);bottom:auto;top:50%;transform:translateY(calc(-50% + 7px));width:min(430px,calc(100vw - 36px))}
+  .source-hover.is-open .source-window,.source-hover:focus-within .source-window{transform:translateY(-50%)}
+}
+@media (hover:hover) and (pointer:fine) and (min-width:721px){
+  .source-hover:hover .source-window{transform:translateY(-50%)}
+}
+@media(max-width:620px){
+  .source-window{bottom:70px}
+}

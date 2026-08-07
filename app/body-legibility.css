@@ -1,12 +1,51 @@
 /* Boardroom-distance typography for explanatory and supporting copy. */
-.section-intro>p,.lede{font-size:16px!important;line-height:1.7!important}
-.engine p{font-size:14px!important;line-height:1.65!important}
-.math-stack p,.scenario-note p,.decision-list p{font-size:13px!important;line-height:1.55!important}
-.kpi-board p,.risk-register p{font-size:12px!important;line-height:1.5!important}
-.growth-title>p{font-size:14px!important;line-height:1.7!important}
-.force-grid article>p,.market-grid p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.risk-summary>p,.risk-response p,.difference-grid p,.difference-bottom p{font-size:13px!important;line-height:1.65!important}
-.moat-list p,.priority-list p,.deep-risk-grid p{font-size:13px!important;line-height:1.6!important}
-.timing-strip p{font-size:13px!important;line-height:1.55!important}
-.drawer-head>p{font-size:14px!important;line-height:1.7!important}
-.drawer-callout p,.drawer-action p{font-size:13px!important;line-height:1.6!important}
-@media(max-width:620px){.section-intro>p,.lede{font-size:15px!important}.growth-title>p,.engine p{font-size:13px!important}.force-grid article>p,.market-grid p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.risk-summary>p,.risk-response p,.difference-grid p,.difference-bottom p{font-size:12.5px!important}}
+.section-intro>p,.lede{font-size:16px!important;line-height:1.65!important;max-width:62ch}
+.engine p{font-size:15px!important;line-height:1.6!important;color:#d5dde8!important}
+.engine.ai p{color:#49200a!important}
+.math-stack p,.scenario-note p,.decision-list p,.decision-intro>p{font-size:14px!important;line-height:1.55!important}
+.kpi-board p,.kpi-escalation>p{font-size:14px!important;line-height:1.55!important}
+.risk-register p{font-size:14px!important;line-height:1.55!important;color:#5c6778!important}
+.growth-title>p{font-size:15px!important;line-height:1.65!important;color:#c5d0e0!important;max-width:52ch}
+.force-grid article>p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.difference-grid p,.difference-bottom p{font-size:15px!important;line-height:1.6!important}
+.force-grid article>p,.moat-stage-grid p{color:#d2dbe8!important}
+.priority-summary p{color:#d2dbe8!important}
+.priority-evidence-list>article.open .priority-summary p{color:#5a6575!important}
+.priority-detail p{color:#4d5665!important}
+.priority-detail .why p{color:#26160d!important}
+.market-grid p{font-size:15px!important;line-height:1.6!important;color:#d2dbe8!important}
+.market-hero p{color:#4d5665!important}
+.risk-summary>p{font-size:15px!important;line-height:1.55!important;color:#d2dbe8!important}
+.risk-response p{font-size:15px!important;line-height:1.55!important;color:#d8e0ec!important}
+.risk-response .response-main p{font-size:15px!important;line-height:1.55!important;color:#24150d!important;font-weight:700!important}
+.moat-list p,.priority-list p,.deep-risk-grid p{font-size:15px!important;line-height:1.6!important;color:#d2dbe8!important}
+.timing-strip p{font-size:14px!important;line-height:1.55!important}
+.drawer-head>p{font-size:15px!important;line-height:1.65!important}
+.drawer-callout p,.drawer-action p{font-size:14px!important;line-height:1.6!important}
+.kpi-hover-window>p{font-size:15px!important;line-height:1.6!important;color:#d8e0ec!important}
+.kpi-playbook p{font-size:14px!important;line-height:1.55!important}
+.kpi-hover-window dd{font-size:13px!important;line-height:1.4!important}
+.kpi-hover-window footer,.kpi-hover-window cite{font-size:12px!important;line-height:1.5!important}
+.synergy-card aside>p{font-size:14px!important;line-height:1.55!important;color:#4d5665!important}
+.synergy-card aside dd{font-size:12px!important}
+.synergy-card aside footer{font-size:12px!important;line-height:1.45!important}
+.synergy-total>p,.synergy-governance>p{font-size:14px!important;line-height:1.55!important;color:#d2dbe8!important}
+.synergy-owner{font-size:13px!important;line-height:1.4!important}
+.source-window>p{font-size:14px!important;line-height:1.6!important;color:#4d5665!important}
+.engines-section .section-intro>p{color:#c8d3e3!important}
+.north-star>p{color:#d5dde8!important}
+.difference-hero>p{font-size:14px!important;line-height:1.55!important}
+.difference-grid p{color:#d2dbe8!important}
+.difference-bottom p{color:#d2dbe8!important}
+
+@media(min-width:1200px){
+  .engine p,.force-grid article>p,.market-grid p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.difference-grid p,.difference-bottom p,.growth-title>p{font-size:16px!important;line-height:1.6!important}
+  .risk-summary>p,.risk-response p,.deep-risk-grid p{font-size:15px!important;line-height:1.55!important}
+  .risk-response .response-main p{font-size:15px!important;line-height:1.55!important;color:#24150d!important}
+  .kpi-hover-window>p,.synergy-card aside>p,.drawer-callout p,.drawer-action p{font-size:15px!important;line-height:1.6!important}
+}
+
+@media(max-width:620px){
+  .section-intro>p,.lede{font-size:15px!important}
+  .growth-title>p,.engine p{font-size:14px!important}
+  .force-grid article>p,.market-grid p,.moat-stage-grid p,.priority-summary p,.priority-detail p,.risk-summary>p,.risk-response p,.difference-grid p,.difference-bottom p{font-size:14px!important;line-height:1.55!important}
+}
