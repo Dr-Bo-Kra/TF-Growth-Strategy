@@ -112,8 +112,8 @@ export default function Home() {
     <section id="thesis" className="chapter opening">
       <div className="opening-copy">
         <p className="kicker">FY2026–29 · Board growth strategy</p>
-        <h1>Scale the trusted core.<br/><em>Compound the digital advantage.</em></h1>
-        <p className="lede">A disciplined plan to more than double group revenue by combining specialist offshore accounting, a proven recruitment engine and proprietary AI—while protecting delivery quality and cash discipline.</p>
+        <h1>Scale what already wins.<br/><em>Build what compounds.</em></h1>
+        <p className="lede">Three proven growth engines working together to more than double revenue, expand margins and create recurring value—without compromising delivery quality or cash discipline.</p>
         <div className="signal-row"><div><b>3</b><span>growth engines</span></div><div><Drill id="client-base">410</Drill><span>combined clients</span></div><div><Drill id="synergies">$1.65M</Drill><span>annual synergies</span></div></div>
       </div>
       <div className="north-star">
