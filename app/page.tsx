@@ -12,6 +12,7 @@ import "./header-legibility.css";
 import "./typography-audit.css";
 import "./kpi-hover.css";
 import "./synergy-realisation.css";
+import "./presentation-scale.css";
 
 import { useEffect, useState, type ReactNode } from "react";
 

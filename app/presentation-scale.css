@@ -1,0 +1,579 @@
+/* Boardroom / projector scale: large viewports only.
+   Preserves mobile/tablet + desktop character; raises distance-reading sizes. */
+
+/* —— ≥1440px: primary boardroom bump —— */
+@media (min-width: 1440px) {
+  /* Mild root bump for any rem-based UI; px overrides below carry the load. */
+  html {
+    font-size: 106.25%;
+  }
+
+  /* Body / descriptions — comfortably readable across a room */
+  .section-intro > p,
+  .lede {
+    font-size: 19px !important;
+    line-height: 1.68 !important;
+  }
+  .engine p,
+  .force-grid article > p,
+  .market-grid p,
+  .moat-stage-grid p,
+  .priority-summary p,
+  .priority-detail p,
+  .difference-grid p,
+  .difference-bottom p,
+  .growth-title > p,
+  .moat-list p,
+  .priority-list p,
+  .deep-risk-grid p {
+    font-size: 18px !important;
+    line-height: 1.62 !important;
+  }
+  .risk-summary > p,
+  .risk-response p,
+  .risk-response .response-main p {
+    font-size: 17px !important;
+    line-height: 1.58 !important;
+  }
+  .risk-register p,
+  .math-stack p,
+  .scenario-note p,
+  .decision-list p,
+  .decision-intro > p,
+  .kpi-board p,
+  .kpi-escalation > p,
+  .timing-strip p,
+  .difference-hero > p,
+  .synergy-total > p,
+  .synergy-governance > p,
+  .synergy-card aside > p,
+  .drawer-callout p,
+  .drawer-action p,
+  .source-window > p,
+  .north-star > p {
+    font-size: 16px !important;
+    line-height: 1.58 !important;
+  }
+  .drawer-head > p,
+  .kpi-hover-window > p {
+    font-size: 17px !important;
+    line-height: 1.62 !important;
+  }
+  .kpi-playbook p {
+    font-size: 16px !important;
+    line-height: 1.55 !important;
+  }
+  .kpi-board .kpi-why {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+  .kpi-board .kpi-name {
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+  }
+  .kpi-meta span {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+  .kpi-meta small,
+  .kpi-board .kpi-cue {
+    font-size: 12px !important;
+  }
+  .kpi-hover-window dd {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+  }
+  .kpi-hover-window footer,
+  .kpi-hover-window cite {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  .synergy-card aside dd {
+    font-size: 14px !important;
+  }
+  .synergy-card aside footer,
+  .synergy-owner {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+  .synergy-card .synergy-main > p {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+  }
+  .engine dd,
+  .engine dd .drill {
+    font-size: 16px !important;
+  }
+
+  /* Uppercase labels / badges — still secondary, but distance-legible */
+  .confidential,
+  .header-actions > button,
+  .jump,
+  .rail a,
+  .kicker,
+  .chapter-label p,
+  .signal-row span,
+  .ns-top,
+  .ns-rule span,
+  .margin span,
+  .bars button span,
+  .year > b,
+  .year > small,
+  .legend,
+  .math-stack small,
+  .engine > div > span,
+  .engine dt,
+  .flywheel,
+  .growth-entry span,
+  .growth-entry i,
+  .scenario-tabs button,
+  .scenario-lead span,
+  .scenario-note b,
+  .pricing > span,
+  .scenario-lead p,
+  .pricing small,
+  .scenario-stat small,
+  .risk-title small,
+  .synergy-strip > div small,
+  .synergy-strip > span,
+  .decision-list article > b,
+  .growth-head small,
+  .growth-title > small,
+  .timing-strip b,
+  .market-hero > div span,
+  .moat-proof,
+  .priority-summary > b,
+  .moat-stage-head small,
+  .moat-stage-grid small,
+  .priority-detail small,
+  .risk-response small,
+  .difference-hero small,
+  .difference-bottom small,
+  .difference-grid small,
+  .market-grid small,
+  .moat-selector small,
+  .drawer-head small,
+  .drawer-callout small,
+  .drawer-action small,
+  .drawer-rows span,
+  .kpi-hover-window header small,
+  .kpi-playbook small,
+  .kpi-escalation > span,
+  .synergy-total > small,
+  .synergy-owner small,
+  .synergy-governance > b,
+  .synergy-card aside header small,
+  .synergy-card aside dt,
+  .synergy-total span,
+  .data-note,
+  .market-note,
+  .difference-source,
+  .drawer-source,
+  .source-trigger,
+  .source-window > div small,
+  .source-window dt,
+  .source-window em,
+  .source-window dd,
+  .growth-foot,
+  .growth-foot button {
+    font-size: 14px !important;
+  }
+  .kpi-hover-window dt,
+  .synergy-metrics .synergy-share small,
+  .synergy-share small {
+    font-size: 13px !important;
+  }
+  .risk-register em,
+  .deep-risk-grid em,
+  .risk-summary em {
+    font-size: 12px !important;
+  }
+  footer {
+    font-size: 12px !important;
+  }
+
+  /* Card / section headings — modest lift; hero stays dominant via clamp */
+  .force-grid article > b,
+  .difference-grid h4,
+  .priority-summary h4,
+  .risk-summary h4,
+  .deep-risk-grid h4,
+  .decision-list h3,
+  .moat-selector b,
+  .kpi-hover-window h3,
+  .synergy-card aside h3 {
+    font-size: 28px !important;
+  }
+  .risk-title > b {
+    font-size: 32px !important;
+  }
+  .engine h3 {
+    font-size: 40px !important;
+  }
+  .difference-hero h4 {
+    font-size: 36px !important;
+  }
+  .moat-stage-head h4 {
+    font-size: 40px !important;
+  }
+  .priority-evidence-list > article.open .priority-summary h4 {
+    font-size: 38px !important;
+  }
+  .drawer-head h2 {
+    font-size: 48px !important;
+  }
+  .drawer-rows b {
+    font-size: 20px !important;
+  }
+  .kpi-board .kpi-target {
+    font-size: 30px !important;
+  }
+  .kpi-hover-window header strong {
+    font-size: 34px !important;
+  }
+  .growth-entry b {
+    font-size: 20px !important;
+  }
+  .risk-register article b,
+  .synergy-strip > span b,
+  .close b {
+    font-size: 15px !important;
+  }
+
+  /* Navy surface contrast: slightly brighter supporting copy */
+  .engine p,
+  .force-grid article > p,
+  .market-grid p,
+  .moat-stage-grid p,
+  .priority-summary p,
+  .moat-list p,
+  .priority-list p,
+  .deep-risk-grid p,
+  .risk-summary > p,
+  .difference-grid p,
+  .difference-bottom p,
+  .synergy-total > p,
+  .synergy-governance > p {
+    color: #dce4f0 !important;
+  }
+  .growth-title > p {
+    color: #d2dbe8 !important;
+  }
+  .engines-section .section-intro > p {
+    color: #d0dae8 !important;
+  }
+  .north-star > p {
+    color: #e0e6ef !important;
+  }
+  .risk-response p {
+    color: #e2e8f2 !important;
+  }
+  .kpi-hover-window > p {
+    color: #e2e8f2 !important;
+  }
+  .kpi-hover-window dt {
+    color: #c0cad9 !important;
+  }
+  .engine dt {
+    color: #b8c4d6 !important;
+  }
+
+  /* Allow denser cards/rows to breathe with larger type */
+  .kpi-board .kpi-control {
+    min-height: 108px;
+    padding: 22px 24px;
+  }
+  .risk-register article {
+    padding: 16px 0;
+  }
+  .risk-summary {
+    padding: 24px 10px;
+  }
+  .priority-summary {
+    min-height: 230px;
+    padding: 26px;
+  }
+  .engine {
+    padding: 34px;
+  }
+
+  /* Hover / touch panels: room for larger type, stay in viewport */
+  .kpi-hover-window {
+    max-width: min(580px, calc(100vw - 36px));
+    max-height: min(82vh, calc(100vh - 32px));
+    padding: 28px;
+  }
+  .synergy-card aside {
+    max-width: min(480px, calc(100vw - 36px));
+    max-height: min(82vh, calc(100vh - 32px));
+    padding: 24px;
+    overflow: auto;
+  }
+}
+
+/* —— ≥1600px: further distance scale —— */
+@media (min-width: 1600px) {
+  html {
+    font-size: 112.5%;
+  }
+
+  .section-intro > p,
+  .lede {
+    font-size: 20px !important;
+    line-height: 1.7 !important;
+  }
+  .engine p,
+  .force-grid article > p,
+  .market-grid p,
+  .moat-stage-grid p,
+  .priority-summary p,
+  .priority-detail p,
+  .difference-grid p,
+  .difference-bottom p,
+  .growth-title > p,
+  .moat-list p,
+  .priority-list p,
+  .deep-risk-grid p {
+    font-size: 19px !important;
+    line-height: 1.64 !important;
+  }
+  .risk-summary > p,
+  .risk-response p,
+  .risk-response .response-main p,
+  .drawer-head > p,
+  .kpi-hover-window > p {
+    font-size: 18px !important;
+    line-height: 1.6 !important;
+  }
+  .risk-register p,
+  .math-stack p,
+  .scenario-note p,
+  .decision-list p,
+  .decision-intro > p,
+  .kpi-board p,
+  .kpi-escalation > p,
+  .timing-strip p,
+  .difference-hero > p,
+  .synergy-total > p,
+  .synergy-governance > p,
+  .synergy-card aside > p,
+  .drawer-callout p,
+  .drawer-action p,
+  .source-window > p,
+  .north-star > p,
+  .kpi-playbook p {
+    font-size: 17px !important;
+    line-height: 1.58 !important;
+  }
+  .kpi-board .kpi-why {
+    font-size: 16px !important;
+  }
+  .kpi-board .kpi-name {
+    font-size: 18px !important;
+  }
+  .kpi-hover-window dd,
+  .synergy-card aside dd,
+  .engine dd,
+  .engine dd .drill {
+    font-size: 16px !important;
+  }
+  .synergy-card .synergy-main > p {
+    font-size: 16px !important;
+  }
+
+  .confidential,
+  .header-actions > button,
+  .jump,
+  .rail a,
+  .kicker,
+  .chapter-label p,
+  .signal-row span,
+  .ns-top,
+  .ns-rule span,
+  .margin span,
+  .engine > div > span,
+  .engine dt,
+  .growth-head small,
+  .growth-title > small,
+  .moat-stage-head small,
+  .moat-stage-grid small,
+  .priority-detail small,
+  .risk-response small,
+  .difference-hero small,
+  .difference-bottom small,
+  .difference-grid small,
+  .market-grid small,
+  .moat-selector small,
+  .kpi-hover-window header small,
+  .kpi-playbook small,
+  .kpi-escalation > span,
+  .synergy-total > small,
+  .synergy-governance > b,
+  .data-note,
+  .market-note,
+  .difference-source,
+  .drawer-source,
+  .source-trigger,
+  .source-window > div small,
+  .source-window dt,
+  .source-window em,
+  .source-window dd,
+  .growth-foot,
+  .growth-foot button {
+    font-size: 15px !important;
+  }
+  .risk-register em,
+  .deep-risk-grid em,
+  .risk-summary em {
+    font-size: 13px !important;
+  }
+
+  .force-grid article > b,
+  .difference-grid h4,
+  .priority-summary h4,
+  .risk-summary h4,
+  .deep-risk-grid h4,
+  .decision-list h3 {
+    font-size: 30px !important;
+  }
+  .kpi-board .kpi-target {
+    font-size: 32px !important;
+  }
+  .kpi-hover-window {
+    max-width: min(620px, calc(100vw - 40px));
+    width: min(620px, min(40vw, calc(100vw - 40px)));
+  }
+}
+
+/* —— ≥1920px: projector / large TV —— */
+@media (min-width: 1920px) {
+  html {
+    font-size: 118.75%;
+  }
+
+  .section-intro > p,
+  .lede {
+    font-size: 21px !important;
+    line-height: 1.72 !important;
+  }
+  .engine p,
+  .force-grid article > p,
+  .market-grid p,
+  .moat-stage-grid p,
+  .priority-summary p,
+  .priority-detail p,
+  .difference-grid p,
+  .difference-bottom p,
+  .growth-title > p,
+  .moat-list p,
+  .priority-list p,
+  .deep-risk-grid p {
+    font-size: 20px !important;
+    line-height: 1.65 !important;
+  }
+  .risk-summary > p,
+  .risk-response p,
+  .risk-response .response-main p,
+  .drawer-head > p,
+  .kpi-hover-window > p {
+    font-size: 19px !important;
+    line-height: 1.62 !important;
+  }
+  .risk-register p,
+  .math-stack p,
+  .scenario-note p,
+  .decision-list p,
+  .decision-intro > p,
+  .kpi-board p,
+  .kpi-escalation > p,
+  .timing-strip p,
+  .difference-hero > p,
+  .synergy-total > p,
+  .synergy-governance > p,
+  .synergy-card aside > p,
+  .drawer-callout p,
+  .drawer-action p,
+  .source-window > p,
+  .north-star > p,
+  .kpi-playbook p,
+  .kpi-board .kpi-why {
+    font-size: 18px !important;
+    line-height: 1.58 !important;
+  }
+  .kpi-board .kpi-name {
+    font-size: 19px !important;
+  }
+  .kpi-meta span {
+    font-size: 14px !important;
+  }
+  .kpi-hover-window dd,
+  .synergy-card aside dd,
+  .engine dd,
+  .engine dd .drill,
+  .synergy-card .synergy-main > p {
+    font-size: 17px !important;
+  }
+  .kpi-hover-window footer,
+  .kpi-hover-window cite,
+  .synergy-card aside footer,
+  .synergy-owner {
+    font-size: 14px !important;
+  }
+
+  .rail a,
+  .kicker,
+  .chapter-label p,
+  .engine > div > span,
+  .growth-head small,
+  .growth-title > small,
+  .moat-stage-head small,
+  .market-grid small,
+  .moat-selector small,
+  .kpi-hover-window header small,
+  .synergy-total > small,
+  .synergy-governance > b,
+  .data-note,
+  .source-trigger,
+  .growth-foot,
+  .growth-foot button {
+    font-size: 15px !important;
+  }
+
+  .engine h3 {
+    font-size: 44px !important;
+  }
+  .force-grid article > b,
+  .difference-grid h4,
+  .priority-summary h4,
+  .risk-summary h4,
+  .deep-risk-grid h4,
+  .decision-list h3,
+  .moat-selector b,
+  .kpi-hover-window h3,
+  .synergy-card aside h3 {
+    font-size: 32px !important;
+  }
+  .drawer-head h2 {
+    font-size: 52px !important;
+  }
+  .kpi-board .kpi-target {
+    font-size: 34px !important;
+  }
+  .kpi-hover-window header strong {
+    font-size: 36px !important;
+  }
+  .kpi-board .kpi-control {
+    min-height: 118px;
+    padding: 24px 26px;
+  }
+  .priority-summary {
+    min-height: 250px;
+    padding: 28px;
+  }
+  .kpi-hover-window {
+    max-width: min(680px, calc(100vw - 48px));
+    width: min(680px, min(38vw, calc(100vw - 48px)));
+    max-height: min(84vh, calc(100vh - 40px));
+    padding: 32px;
+  }
+}
