@@ -12,13 +12,18 @@ import "./header-legibility.css";
 import "./typography-audit.css";
 import "./kpi-hover.css";
 import "./synergy-realisation.css";
+import "./people-readiness.css";
+import "./strategy-chat.css";
+import "./integration-framework.css";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { integrationActivities } from "./integration-activities";
 
 const nav = [
   ["thesis", "01", "Thesis"], ["trajectory", "02", "Trajectory"],
-  ["engines", "03", "Growth engines"], ["scenarios", "04", "Scenarios"],
-  ["operating", "05", "Operating plan"], ["decisions", "06", "Board decisions"],
+  ["engines", "03", "Growth engines"], ["people", "04", "People readiness"],
+  ["scenarios", "05", "Scenarios"], ["operating", "06", "Operating plan"],
+  ["integration", "07", "Integration"], ["decisions", "08", "Board decisions"],
 ] as const;
 
 const money = (value: number) => `$${value.toFixed(1)}M`;
@@ -54,6 +59,137 @@ const drilldowns: Record<string, { eyebrow:string; title:string; value:string; s
   "ai-mrr": { eyebrow:"Direct from budget · verified", title:"AI Digital June run-rate MRR", value:"$242,483", summary:"The June run-rate comes directly from the budget worksheet after TF and FA activate in September and Backroom activates in January.", rows:[["Sep 26","$179,338"],["Jan-Jun 27","$242,483"],["Platform","$2,700 · all adopters"],["AI employee","$1,800 · 30% of adopters"]], assumption:"The budget uses segment-specific internally derived realised rates; the $15,000 setup fee applies to 30% of adopters and is excluded from MRR.", action:"Track actual MRR against the monthly build; treat September below $150k as the earliest conversion warning.", source:"AI Pricing Model · pages 7-8 · AI Digital MRR Run-Rate" },
 };
 
+type ChatMessage = { role:"assistant"|"user"; text:string; sources?:string[]; view?:"financial-changes" };
+type VoiceRecognition = {lang:string;continuous:boolean;interimResults:boolean;start:()=>void;stop:()=>void;onresult:((event:{results:ArrayLike<{0:{transcript:string};isFinal:boolean}>})=>void)|null;onerror:((event:{error:string})=>void)|null;onend:(()=>void)|null};
+
+const strategyThemes = [
+  { keywords:["dashboard","dashboard comparison","dashboard says","dashboard numbers","reconcile dashboard","40.2","69.4","42.4","72.8","scope"], answer:"The figures reconcile by scope. The TF+FA consolidated model excludes AI Digital and reports $40.2M in FY26/27 and $69.4M in FY28/29. Adding Tech Consolidated / AI Digital produces full-group revenue of approximately $42.4M and $72.8M. The Board page’s $42.0M and $72.5M are rounded presentation figures and are directionally consistent with the full-group totals—not a competing forecast. The implied AI Digital contribution is about $2.2M in FY26/27 and $3.4M in FY28/29.", sources:["TF+FA Consolidated · row 21 · excludes AI Digital", "Tech Consolidated · AI Digital", "C-Level Executive Analysis · rounded full-group presentation"] },
+  { keywords:["monthly p&l","monthly revenue","monthly ebitda","september loss","month by month"], answer:"The uploaded dashboard provides the monthly FY26/27 operating profile. Revenue ranges from $2.782M in August to $3.613M in April. September is the only EBITDA-negative month at approximately −$31.9k, after OpEx rises to about $1.139M. EBITDA strengthens to roughly $389k in January and peaks around $394k in April. This is useful as an execution cadence, but it belongs to the dashboard case rather than the revised executive baseline.", sources:["Budget Dashboard FY2026/27 · dashboard (6) · Monthly P&L"] },
+  { keywords:["dashboard forecast","dashboard ebitda","dashboard margin","cost structure","dashboard opex"], answer:"In the uploaded dashboard case, FY26/27 gross profit is $15.195M at 37.78%, OpEx is $11.360M and EBITDA is $3.835M at 9.53%. By FY28/29 it forecasts $30.617M gross profit, $13.478M OpEx and $17.139M EBITDA at 24.69%. The dashboard therefore shows strong later operating leverage, but a lower first-year EBITDA than the revised post-synergy Board case.", sources:["Budget Dashboard FY2026/27 · dashboard (6) · Four-year P&L"] },
+  { keywords:["why now","timing","market window","shortage"], answer:"The plan is timely because accounting talent shortages are structural, outsourcing adoption is established, and Talent Formula has specialist delivery capacity, a proven recruitment engine and an AI proposition ready at the same time. The survey strengthens the timing case: 95% enablement and 95% teamwork suggest the organisation does not need a cultural turnaround before scaling.", sources:["C-Level Executive Analysis · Why Now", "Overall Satisfaction Survey 2025 · Enablement and Teamwork"] },
+  { keywords:["why us","advantage","moat","different","win"], answer:"Talent Formula’s advantage is the combination, not any single asset. Accounting specialisation protects quality; the recruitment engine supplies scarce talent; trusted client relationships provide distribution; and AI Digital adds recurring economics. The survey adds a harder-to-copy execution moat: 87% overall satisfaction, 95% enablement and 95% teamwork.", sources:["C-Level Executive Analysis · Why Talent Formula is positioned to win", "Overall Satisfaction Survey 2025 · Executive strengths"] },
+  { keywords:["culture","people","survey","employee","readiness"], answer:"The culture is an enabler of the growth case, not the constraint. The survey records 87% overall satisfaction, 95% enablement, 95% teamwork and 94% work-life blend. Management’s task is to preserve that advantage during rapid hiring and integration through clearer careers, recognition, two-way communication and visible follow-through.", sources:["Overall Satisfaction Survey 2025 · 153 responses"] },
+  { keywords:["biggest risk","risks","break the case","downside"], answer:"The most material execution risks are FLA headcount delivery, the UK revenue assumption, unproven AI adoption, Talent Formula gross-margin compression, facilities commitments and FX exposure. The plan addresses them with explicit triggers, accountable owners and monthly Board monitoring.", sources:["C-Level Executive Analysis · Risk-adjusted growth case", "AI Pricing Model · Operating guardrails"] },
+  { keywords:["budget different","different budget","what is different"], answer:"This budget is different because it connects growth to an operating system: three distinct engines, a phased AI pricing model, twelve leading KPIs, named risk triggers, an itemised $1.65M synergy register and measured people readiness. It also separates sourced facts, calculated targets and assumptions that still require validation.", sources:["C-Level Executive Analysis · Revised executive case", "KPI Analysis FY2026/27", "AI Pricing Model"] },
+];
+
+const dashboardChangeAnswer = `Year-on-year percentage change (FY25/26→FY26/27 | FY26/27→FY27/28 | FY27/28→FY28/29)
+
+REVENUE
+TF Australia: +30.9% | +22.6% | +25.3%
+TF UK: +88.7% | +69.9% | +56.5%
+TF Other: +41.0% | +53.7% | +47.9%
+TF total: +48.2% | +42.1% | +40.7%
+Frontline Accounting: +8.1% | +16.5% | +15.8%
+QGCC: −49.9% | 0.0% | 0.0%
+TF+FA total excluding QGCC: +19.6% | +39.3% | +24.3%
+Dashboard total including QGCC: +18.1% | +39.0% | +24.2%
+
+PROFIT AND EXPENSE TOTALS
+Direct costs: +13.5% | +22.8% | +26.2%
+Gross profit: +26.6% | +65.6% | +21.7%
+Total OpEx: +27.8% | +10.2% | +7.6%
+
+OPERATING EXPENSE ITEMS
+Executive-team salaries: +103.1% | 0.0% | 0.0%
+Admin labour: −12.0% | +16.0% | +15.8%
+Sales-team salaries: −3.2% | 0.0% | 0.0%
+IT-support salaries: +110.8% | +10.0% | +10.0%
+Recruitment/HR salaries: +19.7% | +10.0% | +10.0%
+Office-operations salaries: +20.0% | +10.1% | +9.9%
+Housekeeping/drivers: +18.8% | +10.0% | +10.0%
+Salary MV: 0.0% | 0.0% | 0.0%
+PF administration charges: +27.3% | +10.0% | +9.7%
+PF contributions—admin: +32.0% | +10.0% | +9.7%
+Payroll taxes and benefits: 0.0% | +15.9% | +13.2%
+Hyderabad office rent: +57.7% | +2.1% | +2.1%
+Facilities: +1.4% | +78.1% | +7.7%
+Accommodation rent: +118.9% | 0.0% | +2.6%
+Rent recharge to Quantaco: −89.1% | 0.0% | 0.0%
+Executive marketing: −0.3% | −0.5% | +2.8%
+India marketing: +85.8% | 0.0% | 0.0%
+Computer licences/software: +61.1% | +5.6% | +7.3%
+Marketing software tools: n/m | 0.0% | 0.0%
+Computer maintenance/hardware: +8.3% | 0.0% | 0.0%
+Computer leases: −97.5% | +2,383.3% | +131.7%
+Other operating expenses: −8.5% | +9.9% | +11.3%
+Staff amenities: +39.8% | +5.9% | +7.6%
+Staff meals: +48.3% | +4.7% | +6.1%
+Staff travel: +71.3% | 0.0% | 0.0%
+Staff wellbeing: +20.5% | +54.1% | +48.2%
+Staff training: +35.7% | 0.0% | 0.0%
+Staff taxi: +5.8% | 0.0% | 0.0%
+CSR: +130.7% | 0.0% | 0.0%
+National events: +20.0% | 0.0% | 0.0%
+Directors’ travel: +50.8% | 0.0% | 0.0%
+Staff medical insurance: +71.2% | +19.9% | +22.8%
+Recruitment professional fees: +69.0% | +24.0% | +26.5%
+Staff internet allowances: +58.6% | +6.0% | +7.7%
+Leased-line internet: +36.4% | +19.1% | +22.1%
+Payroll tax: +130.8% | 0.0% | 0.0%
+Legal: n/m | 0.0% | 0.0%
+Accounting/auditing: +9.6% | 0.0% | 0.0%
+Bank charges: +9.4% | 0.0% | 0.0%
+Telephones: +51.8% | 0.0% | 0.0%
+Fuel: +39.8% | 0.0% | 0.0%
+Fraud insurance: +10.1% | 0.0% | 0.0%
+Motor-vehicle lease: +4.7% | 0.0% | 0.0%
+
+n/m means the percentage is not meaningful because the prior-year value was zero. The dashboard revenue schedule covers TF+FA/QGCC; AI Digital is held in Tech Consolidated.`;
+
+function answerStrategy(question:string) {
+  const query = question.toLowerCase().replace(/[’']/g, "'");
+  const asksAiRevenue = /\bai(?: digital)?\b/.test(query) && /revenue|sales/.test(query);
+  if (asksAiRevenue) {
+    const asks2728 = /27\s*[\/–-]\s*28|fy\s*27\s*[\/–-]\s*28|2027\s*[\/–-]\s*28/.test(query) || /\bin\s+(?:fy\s*)?28\b/.test(query);
+    const asks2627 = /26\s*[\/–-]\s*27|fy\s*26\s*[\/–-]\s*27|2026\s*[\/–-]\s*27/.test(query) || /\bin\s+(?:fy\s*)?27\b/.test(query);
+    if (asks2728) return { text:"AI Digital revenue is $3.1M in FY27/28. I interpreted ‘28’ as the financial year ending FY27/28.", sources:["Executive analysis · Section 07 full P&L summary"] };
+    if (asks2627) return { text:"AI Digital revenue is $2.13M in FY26/27 (approximately $2.1M). I interpreted ‘27’ as the financial year ending FY26/27.", sources:["AI Pricing Model · FY26/27 expected case", "KPI Analysis · AI Digital adoption scenarios"] };
+    return { text:"Which period do you mean: FY26/27 or FY27/28? The approved figures are $2.13M and $3.1M respectively.", sources:["AI Pricing Model · FY26/27 expected case", "Executive analysis · Section 07 full P&L summary"] };
+  }
+  const asksRevenueChange = /revenue/.test(query) && /change|growth|percentage|percent|%/.test(query);
+  if (asksRevenueChange && (/\b27\b/.test(query) || /26\s*[\/–-]\s*27/.test(query)) && (/\b28\b/.test(query) || /27\s*[\/–-]\s*28/.test(query))) {
+    return { text:"Group revenue increases from $33.3M to $42.0M in FY26/27, a 26.1% year-on-year increase. It then rises to $58.7M in FY27/28, a 39.8% increase. I treated ‘27 and 28’ as FY26/27 and FY27/28 and used the rounded Board-chart figures.", sources:["Executive analysis · Four-year financial trajectory", "Executive analysis · Section 07 full P&L summary"] };
+  }
+  const asksAllChanges = query.includes("revenue") && (query.includes("expense") || query.includes("opex")) && (query.includes("change") || query.includes("%") || query.includes("percentage"));
+  if (asksAllChanges) return { text:"Complete year-on-year revenue and expense comparison", view:"financial-changes" as const, sources:["Budget Dashboard FY2026/27 · Revenue Breakdown", "Budget Dashboard FY2026/27 · Full OpEx Line-Item Breakdown"] };
+  const theme = strategyThemes.map(item => ({ item, score:item.keywords.reduce((score,key)=>score+(query.includes(key)?key.length:0),0) })).sort((a,b)=>b.score-a.score)[0];
+  if (theme?.score > 0) return { text:theme.item.answer, sources:theme.item.sources };
+  const matches = Object.values(drilldowns).map(item => {
+    const haystack = `${item.title} ${item.eyebrow} ${item.summary} ${item.assumption} ${item.action}`.toLowerCase();
+    const words = query.split(/\W+/).filter(word=>word.length>3);
+    return { item, score:words.reduce((score,word)=>score+(haystack.includes(word)?1:0),0) };
+  }).filter(match=>match.score>0).sort((a,b)=>b.score-a.score).slice(0,2);
+  if (!matches.length || matches[0].score < 2) return { text:"I don’t have enough grounded evidence to answer that confidently. Please narrow the question by naming the metric, entity or scope, and comparison period. I will not guess or fill gaps with unsupported information.", sources:[] };
+  const lead = matches[0].item;
+  const supporting = matches[1]?.item;
+  return { text:`${lead.title} is ${lead.value}. ${lead.summary} ${lead.assumption} Management response: ${lead.action}${supporting ? ` Related evidence: ${supporting.title} is ${supporting.value}.` : ""}`, sources:[lead.source, ...(supporting ? [supporting.source] : [])] };
+}
+
+function FinancialChangesView() {
+  const headings = ["REVENUE","PROFIT AND EXPENSE TOTALS","OPERATING EXPENSE ITEMS"];
+  const sections:{title:string;rows:{label:string;values:string[]}[]}[] = [];
+  let current:{title:string;rows:{label:string;values:string[]}[]} | null = null;
+  dashboardChangeAnswer.split("\n").forEach(line=>{
+    const clean=line.trim();
+    if(headings.includes(clean)){current={title:clean,rows:[]};sections.push(current);return;}
+    if(!current||!clean.includes(":"))return;
+    const [label,...rest]=clean.split(":");
+    current.rows.push({label,values:rest.join(":").trim().split(" | ")});
+  });
+  const tone=(value:string)=>value.startsWith("+")?"up":value.startsWith("−")||value.startsWith("-")?"down":"flat";
+  return <div className="financial-change-view">
+    <div className="change-summary">
+      <div><small>Total revenue</small><b>+18.1%</b><span>FY26/27</span></div>
+      <div><small>TF total</small><b>+48.2%</b><span>FY26/27</span></div>
+      <div><small>Total OpEx</small><b>+27.8%</b><span>FY26/27</span></div>
+    </div>
+    <div className="change-period-key"><span>Period 1<small>25/26→26/27</small></span><span>Period 2<small>26/27→27/28</small></span><span>Period 3<small>27/28→28/29</small></span></div>
+    {sections.map(section=><section className="change-section" key={section.title}><h3>{section.title}</h3><div className="change-table-wrap"><table><thead><tr><th>Line item</th><th>P1</th><th>P2</th><th>P3</th></tr></thead><tbody>{section.rows.map(row=><tr key={row.label}><td>{row.label}</td>{row.values.map((value,i)=><td key={i}><span className={tone(value)}>{value}</span></td>)}</tr>)}</tbody></table></div></section>)}
+    <p className="change-note"><b>n/m</b> means the prior-year value was zero. Dashboard revenue covers TF+FA/QGCC; AI Digital is held in Tech Consolidated.</p>
+  </div>;
+}
+
 export default function Home() {
   const [active, setActive] = useState("thesis");
   const [scenario, setScenario] = useState<"bear" | "expected" | "stretch">("expected");
@@ -63,11 +199,29 @@ export default function Home() {
   const [riskOpen, setRiskOpen] = useState<string | null>("FLA headcount scale-up");
   const [priorityOpen, setPriorityOpen] = useState<string | null>("Integrate Frontline Accounting");
   const [moatOpen, setMoatOpen] = useState("Accounting specialisation");
+  const [integrationView, setIntegrationView] = useState<"phases"|"workstreams"|"value">("phases");
+  const [selectedWorkstream, setSelectedWorkstream] = useState<string | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"I’m Alan, your Board evidence assistant. Ask me about the growth case, assumptions, KPIs, risks, priorities, people readiness or how the uploaded dashboard reconciles to the revised Board case. I’ll answer only from approved evidence and show the source."}]);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceStatus, setVoiceStatus] = useState("Ready for a realtime conversation");
+  const realtimePeerRef = useRef<RTCPeerConnection | null>(null);
+  const realtimeChannelRef = useRef<RTCDataChannel | null>(null);
+  const realtimeStreamRef = useRef<MediaStream | null>(null);
+  const realtimeAudioRef = useRef<HTMLAudioElement | null>(null);
   const scenarios = {
     bear: { adoption: "15%", clients: "~62", revenue: 1.1, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "The pricing model states this case remains above the fixed-cost break-even point." },
     expected: { adoption: "30%", clients: "124", revenue: 2.133705, gp: 1.16463, ebitda: 0.589545, profitability:"$590k EBITDA", note: "Budget case: 55 FA, 15 TF and 54 Backroom customers, phased through the year." },
     stretch: { adoption: "45%", clients: "~185", revenue: 3.2, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "Upside remains above the fixed-cost base; exact EBITDA is not supplied in the pricing model." },
   };
+  const cultureEvidence = {
+    different:{label:"Why this plan is executable",metric:"87% overall satisfaction",copy:"The budget is supported by measured organisational readiness—not only market and financial assumptions. High enablement and ownership provide the operating foundation for three growth engines."},
+    moat:{label:"A moat competitors cannot buy",metric:"95% enablement · 95% teamwork",copy:"Tools and pricing can be copied more easily than a high-trust culture that combines autonomy, accountability and specialist delivery."},
+    priorities:{label:"People evidence behind execution",metric:"88% leadership · 81% career opportunity",copy:"The survey validates the capacity to execute while identifying the safeguards that preserve readiness: visible careers, recognition, communication and follow-through."},
+    risks:{label:"Culture during scale",metric:"Protect the 87% readiness signal",copy:"The risk is not current culture; it is dilution during rapid hiring and integration. Monitor satisfaction, enablement, regrettable turnover, recognition and visible action as leading indicators."},
+  } as const;
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -79,11 +233,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); } };
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); setChatOpen(false); setSelectedWorkstream(null); } };
     window.addEventListener("keydown", close);
-    document.body.style.overflow = selected || growthOpen ? "hidden" : "";
+    document.body.style.overflow = selected || growthOpen || selectedWorkstream ? "hidden" : "";
     return () => { window.removeEventListener("keydown", close); document.body.style.overflow = ""; };
-  }, [selected, growthOpen]);
+  }, [selected, growthOpen, selectedWorkstream]);
 
   const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${id === "ai-scenario" ? `${scenario} AI Digital scenario` : drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
   const scenarioReference = {
@@ -96,12 +250,107 @@ export default function Home() {
     rows:([["Adoption rate",scenarios[scenario].adoption],["Clients converted",scenarios[scenario].clients],["Gross profit",scenarioReference.gp],["EBITDA",scenarioReference.ebitda]] as [string,string][]),
     assumption:"Eligible clients enter the funnel in phases: TF first, FA from September and Backroom from month 7 in the KPI budget model.", action:"Compare actual conversions, live customers, MRR and revenue per customer with this case every month.", source:"KPI Analysis · AI Digital adoption scenarios"
   } : selected ? drilldowns[selected] : null;
+  const askStrategy = (question = chatInput) => {
+    const clean = question.trim();
+    if (!clean) return;
+    const answer = answerStrategy(clean);
+    setChatMessages(messages=>[...messages,{role:"user",text:clean},{role:"assistant",text:answer.text,sources:answer.sources,view:"view" in answer?answer.view:undefined}]);
+    setChatInput("");
+    if (voiceEnabled && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const spoken = "view" in answer ? "I have prepared the complete year on year revenue and expense comparison as a structured table on screen." : answer.text;
+      const utterance = new SpeechSynthesisUtterance(spoken);
+      const voices = window.speechSynthesis.getVoices();
+      utterance.voice = voices.find(voice=>/natural|premium|enhanced/i.test(voice.name) && /^en[-_]/i.test(voice.lang))
+        || voices.find(voice=>/^en-(AU|GB)/i.test(voice.lang))
+        || voices.find(voice=>/^en[-_]/i.test(voice.lang))
+        || null;
+      utterance.rate = 0.94;
+      utterance.pitch = 0.96;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+  const stopRealtimeVoice = () => {
+    realtimeChannelRef.current?.close();
+    realtimePeerRef.current?.close();
+    realtimeStreamRef.current?.getTracks().forEach(track => track.stop());
+    if (realtimeAudioRef.current) realtimeAudioRef.current.srcObject = null;
+    realtimeChannelRef.current = null;
+    realtimePeerRef.current = null;
+    realtimeStreamRef.current = null;
+    realtimeAudioRef.current = null;
+    setIsListening(false);
+    setVoiceStatus("Realtime conversation ended");
+  };
+
+  const toggleListening = async () => {
+    if (isListening) { stopRealtimeVoice(); return; }
+    if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined") {
+      setVoiceStatus("Realtime voice requires a current version of Chrome, Edge or Safari.");
+      return;
+    }
+    setVoiceStatus("Connecting securely to Alan…");
+    try {
+      const tokenResponse = await fetch("https://xryrekfeuknlqmidekww.supabase.co/functions/v1/alan-realtime-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      const tokenData = await tokenResponse.json();
+      if (!tokenResponse.ok || !tokenData.value) throw new Error(tokenData.error || "Unable to create a realtime session");
+
+      const peer = new RTCPeerConnection();
+      const remoteAudio = new Audio();
+      remoteAudio.autoplay = true;
+      peer.ontrack = event => { remoteAudio.srcObject = event.streams[0]; };
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+      });
+      stream.getTracks().forEach(track => peer.addTrack(track, stream));
+
+      const channel = peer.createDataChannel("oai-events");
+      channel.addEventListener("open", () => {
+        setIsListening(true);
+        setVoiceStatus("Alan is listening — speak naturally and take your time");
+      });
+      channel.addEventListener("message", event => {
+        const message = JSON.parse(event.data) as {type?:string;transcript?:string;error?:{message?:string}};
+        if (message.type === "input_audio_buffer.speech_started") setVoiceStatus("Listening…");
+        if (message.type === "input_audio_buffer.speech_stopped") setVoiceStatus("Alan is thinking…");
+        if (message.type === "conversation.item.input_audio_transcription.completed" && message.transcript?.trim()) {
+          setChatMessages(items => [...items, { role:"user", text:message.transcript!.trim() }]);
+        }
+        if (message.type === "response.output_audio_transcript.done" && message.transcript?.trim()) {
+          setChatMessages(items => [...items, { role:"assistant", text:message.transcript!.trim(), sources:["Alan realtime session · approved Board evidence pack"] }]);
+        }
+        if (message.type === "response.done") setVoiceStatus("Alan is listening — you can continue");
+        if (message.type === "error") setVoiceStatus(message.error?.message || "Alan’s realtime session encountered an error");
+      });
+      channel.addEventListener("close", () => setIsListening(false));
+
+      const offer = await peer.createOffer();
+      await peer.setLocalDescription(offer);
+      const sdpResponse = await fetch("https://api.openai.com/v1/realtime/calls", {
+        method: "POST",
+        body: offer.sdp,
+        headers: { Authorization: `Bearer ${tokenData.value}`, "Content-Type": "application/sdp" }
+      });
+      if (!sdpResponse.ok) throw new Error("OpenAI could not establish the realtime audio connection");
+      await peer.setRemoteDescription({ type:"answer", sdp:await sdpResponse.text() });
+      realtimePeerRef.current = peer;
+      realtimeChannelRef.current = channel;
+      realtimeStreamRef.current = stream;
+      realtimeAudioRef.current = remoteAudio;
+    } catch (error) {
+      stopRealtimeVoice();
+      setVoiceStatus(error instanceof Error ? error.message : "Unable to start realtime voice");
+    }
+  };
 
   return <main>
     <header className="masthead">
-      <a className="wordmark" href="#thesis"><img src="/tf-logo-wide.png" alt="Talent Formula" /></a>
+      <a className="wordmark" href="#thesis"><img src="./tf-logo-wide.png" alt="Talent Formula" /></a>
       <div className="confidential">Confidential · FY2026-27</div>
-      <div className="header-actions"><button type="button" onClick={()=>setGrowthOpen(true)}>Growth case <span>+</span></button><a className="jump" href="#decisions">Board asks <span>↘</span></a></div>
+      <div className="header-actions"><button type="button" className="ask-strategy-top" onClick={()=>setChatOpen(true)}>Ask Alan <span>?</span></button><button type="button" onClick={()=>setGrowthOpen(true)}>Growth case <span>+</span></button><a className="jump" href="#decisions">Board asks <span>↘</span></a></div>
     </header>
 
     <aside className="rail" aria-label="Board plan chapters">
@@ -112,9 +361,9 @@ export default function Home() {
     <section id="thesis" className="chapter opening">
       <div className="opening-copy">
         <p className="kicker">FY2026–29 · Board growth strategy</p>
-        <h1>Scale the trusted core.<br/><em>Compound the digital advantage.</em></h1>
+        <h1>Scale what already wins.<br/><em>Build what compounds.</em></h1>
         <p className="lede">A disciplined plan to more than double group revenue by combining specialist offshore accounting, a proven recruitment engine and proprietary AI—while protecting delivery quality and cash discipline.</p>
-        <div className="signal-row"><div><b>3</b><span>growth engines</span></div><div><Drill id="client-base">410</Drill><span>combined clients</span></div><div><Drill id="synergies">$1.65M</Drill><span>annual synergies</span></div></div>
+        <div className="signal-row"><div><b>3</b><span>growth engines</span></div><div><Drill id="client-base">410</Drill><span>combined clients</span></div><div><b>87%</b><span>people readiness</span></div><div><Drill id="synergies">$1.65M</Drill><span>annual synergies</span></div></div>
       </div>
       <div className="north-star">
         <div className="ns-top"><span>North star</span><b>FY28/29</b></div>
@@ -154,8 +403,27 @@ export default function Home() {
       <button className="growth-entry" type="button" onClick={()=>setGrowthOpen(true)}><span>Strategic growth case</span><b>Why this market, why now, and why Talent Formula</b><i>Explore →</i></button>
     </section>
 
+    <section id="people" className="chapter people-section">
+      <div className="chapter-label"><span>04</span><p>People readiness</p></div>
+      <div className="people-hero">
+        <div><p className="people-kicker">2025 employee satisfaction · 153 voices</p><h2>The culture is ready to scale.<br/><em>A proven advantage for the growth plan.</em></h2><p className="people-lede">Employee sentiment confirms that Talent Formula already has the enablement, ownership and workplace connection required to execute its growth strategy. The priority is to preserve this cultural advantage as the group adds people, markets and new technology.</p></div>
+        <article className="people-score"><small>Overall satisfaction</small><strong>87%</strong><p>Stable year on year</p><span>3 points above benchmark</span></article>
+      </div>
+      <div className="people-proof">
+        <article><b>153</b><span>employee responses</span></article><article><b>95%</b><span>enablement</span></article><article><b>+11</b><span>teamwork points above benchmark</span></article><article><b>87%</b><span>overall readiness signal</span></article>
+      </div>
+      <div className="people-grid">
+        <section className="people-panel strength-panel"><div className="panel-head"><small>Execution strengths</small><h3>What the growth plan can build on</h3></div>{[["Enablement",95,86],["Teamwork & Ownership",95,84],["Work & Life Blend",94,89]].map(([label,score,benchmark])=><div className="factor" key={label}><div><b>{label}</b><span>{score}%</span></div><i><em style={{width:`${score}%`}}/></i><small>{Number(score)-Number(benchmark)} points above benchmark</small></div>)}</section>
+        <section className="people-panel pressure-panel"><div className="panel-head"><small>Readiness safeguards</small><h3>What protects the advantage as we scale</h3></div>{[["Feedback & Recognition","73%","Strengthen visibility as teams grow"],["Action","71%","Make follow-through more visible"],["Leadership","88%","Strong base to support expansion"],["Two-way communication","78%","High-leverage engagement driver"]].map(([label,score,note])=><article key={label}><div><b>{label}</b><strong>{score}</strong></div><p>{note}</p></article>)}</section>
+      </div>
+      <div className="driver-panel"><div><small>Highest-leverage engagement driver</small><h3>Career opportunities</h3><p>Career opportunity is already 81% favourable and four points above the comparison result. Making pathways more visible will help convert a strong culture into retention and internal capability for the next stage of growth.</p></div><div className="sentiment"><span style={{width:"81%"}}>81% favourable</span><span style={{width:"14%"}}>14%</span><span style={{width:"5%"}}>5%</span><small>n=153 · +4 vs comparison</small></div></div>
+      <div className="people-actions"><div className="actions-intro"><small>Preserve the advantage</small><h3>Scale the operating rhythm with the business</h3></div>{[["01","Visible career pathways","Turn growth across FA, TF and AI Digital into credible internal opportunity."],["02","Leadership connection","Keep strategy and context close to employees as the group adds scale and geography."],["03","Recognition at scale","Make delivery, collaboration and innovation wins visible across a larger organisation."],["04","Visible follow-through","Use a quarterly ‘You said / We did’ scorecard to reinforce trust through execution."]].map(([no,title,copy])=><article key={title}><span>{no}</span><h4>{title}</h4><p>{copy}</p></article>)}</div>
+      <div className="people-board-note"><div><small>Culture as a growth asset</small><p><b>A strong foundation for execution.</b> High enablement, ownership and workplace connection give Talent Formula the organisational capacity to scale its specialist accounting, recruitment and AI growth engines. The Board’s role is to protect this advantage as the group expands.</p></div><a href="./sources/talent-formula-employee-satisfaction-survey-2025.pdf" download>View source survey <span>↓</span></a></div>
+      <p className="people-source">Source: Overall Satisfaction Survey 2025. Driver items n=152–153. The report cover cites an 83% benchmark; the detailed factor table cites 84%, so this view uses the factor-table benchmark and flags the discrepancy.</p>
+    </section>
+
     <section id="scenarios" className="chapter scenario-section">
-      <div className="chapter-label"><span>04</span><p>AI adoption scenarios</p></div>
+      <div className="chapter-label"><span>05</span><p>AI adoption scenarios</p></div>
       <div className="section-intro"><h2>Fund the expected case.<br/><em>Gate the downside.</em></h2><p>The corrected budget case reaches 124 active customers at year-end, but recognises $2.13M because TF, FA and Backroom activation is phased through the year.</p></div>
       <div className="scenario-tabs" role="tablist">{(["bear","expected","stretch"] as const).map(s=><button key={s} role="tab" aria-selected={scenario===s} onClick={()=>setScenario(s)} className={scenario===s?"active":""}>{s === "expected" ? "Expected · budget" : s}</button>)}</div>
       <div className="scenario-card">
@@ -170,8 +438,9 @@ export default function Home() {
     </section>
 
     <section id="operating" className="chapter operating-section">
-      <div className="chapter-label"><span>05</span><p>Operating plan</p></div>
+      <div className="chapter-label"><span>06</span><p>Operating plan</p></div>
       <div className="section-intro"><h2>Manage the plan<br/>through <em>leading indicators.</em></h2><p>The KPI set now distinguishes benchmark-grounded targets, budget-derived calculations and unvalidated assumptions. Estimated baselines must be replaced with FY25/26 actuals before Board submission.</p></div>
+      <div className="people-kpi-band"><div><small>People readiness</small><b>Culture is a leading indicator of execution capacity.</b></div><article><strong>87%</strong><span>overall satisfaction · maintain</span></article><article><strong>≥92%</strong><span>enablement · protect</span></article><article><strong>81%</strong><span>career opportunity · improve</span></article><article><strong>73%</strong><span>recognition · improve</span></article><article><strong>71%</strong><span>visible action · improve</span></article><a href="#people">Full evidence →</a></div>
       <div className="operating-grid">
         <div className="kpi-board">
           {[ ["Client retention",">92%","client-retention"],["FLA turnover","<18%","fla-turnover"],["FLA billing utilisation",">88%","billing-utilisation"],["Proposal win rate",">40%","win-rate"],["Pipeline coverage","1.5×","pipeline"],["GP per FLA FTE","$10.2k","gp-fla"],["GP per TF FTE","$22.1k","gp-tf"],["FA managed NRR",">104%","nrr-fa"],["AI Digital NRR",">115%","nrr-ai"],["Time to recruit","<28 days","time-to-recruit"],["AI active customers","124","ai-active-customers"],["AI run-rate MRR","$242k","ai-mrr"] ].map(([label,value,id],i)=>{
@@ -216,8 +485,65 @@ export default function Home() {
       </div>
     </section>
 
+    <section id="integration" className="chapter integration-section">
+      <div className="chapter-label"><span>07</span><p>Integration framework</p></div>
+      <div className="integration-intro">
+        <div><small>Frontline Accounting integration</small><h2>Turn the acquisition<br/>into <em>controlled value.</em></h2></div>
+        <p>The tracker adds the execution system behind the strategy: sequenced phases, accountable workstreams and evidence-based value governance. It does not alter the approved forecast.</p>
+      </div>
+      <div className="integration-facts" aria-label="Integration framework scale">
+        <article><strong>187</strong><span>integration activities</span></article>
+        <article><strong>13</strong><span>accountable workstreams</span></article>
+        <article><strong>5</strong><span>delivery phases</span></article>
+        <article><strong>22</strong><span>value initiatives</span></article>
+        <div><b>Framework loaded</b><span>Baseline and evidence pending</span></div>
+      </div>
+      <div className="integration-switcher" role="tablist" aria-label="Integration framework views">
+        {([['phases','01','Delivery phases'],['workstreams','02','Workstream control'],['value','03','Value governance']] as const).map(([id,no,label])=><button key={id} type="button" role="tab" aria-selected={integrationView===id} className={integrationView===id?'active':''} onClick={()=>setIntegrationView(id)}><span>{no}</span>{label}</button>)}
+      </div>
+      {integrationView==='phases' && <div className="phase-view">
+        <header><div><small>Integration sequence</small><h3>Five gates from readiness to run-rate</h3></div><p>Each phase closes only when its evidence is complete; elapsed time alone does not equal progress.</p></header>
+        <div className="phase-track">{[
+          ['P0','Pre-close → Day 0','Confirm governance, risks, owners and Day 1 readiness.','Readiness signed'],
+          ['P1','Day 1–30','Protect customers, people, cash and uninterrupted delivery.','Stability proven'],
+          ['P2','Day 31–100','Align operating processes and lock validated initiatives.','Baselines approved'],
+          ['P3','Months 4–6','Execute integration waves and verify early benefits.','Evidence accepted'],
+          ['P4','Months 7–12','Embed the operating model and sustain annual run-rate.','Benefits sustained'],
+        ].map(([phase,time,copy,gate])=><article key={phase}><span>{phase}</span><small>{time}</small><h4>{copy}</h4><b>{gate}</b></article>)}</div>
+        <div className="integration-control"><b>Board control</b><p>Report phase completion by evidence accepted, decisions closed and risks retired—not by a subjective percentage-complete estimate.</p></div>
+      </div>}
+      {integrationView==='workstreams' && <div className="workstream-view">
+        <header><div><small>Accountability architecture</small><h3>Every activity has an operating home</h3></div><p>Task count shows the breadth of the framework, not completion status.</p></header>
+        <div className="workstream-grid">{[
+          'Governance & PMO','Synergy Management','Customer & Revenue Protection','Operations','HR & Organisation','Technology','Security & Compliance','Finance & Working Capital','Procurement & Facilities','Quality & Continuous Improvement','Sales & Go-to-Market','Legal & Corporate','Communications & Change'
+        ].map((label,i)=>{const count=integrationActivities.filter(item=>item.workstream===label).length;return <button type="button" key={label} onClick={()=>setSelectedWorkstream(label)} aria-label={`View ${count} activities for ${label}`}><span>{String(i+1).padStart(2,'0')}</span><h4>{label}</h4><strong>{count}</strong><small>activities</small><i aria-hidden="true">View all →</i></button>})}</div>
+      </div>}
+      {integrationView==='value' && <div className="value-view">
+        <header><div><small>Benefits discipline</small><h3>Count value only when it is evidenced</h3></div><p>The existing synergy figure remains a Board target until initiative baselines and financial proof are populated.</p></header>
+        <div className="value-ledger">
+          <aside><small>Targeted annual run-rate</small><strong>$1.65M</strong><p>Existing Board target · validation required</p></aside>
+          <div>{[
+            ['Separate the value','Cost · revenue · working capital'],['Track the state','Planned · committed · realised'],['Prove the economics','Gross benefit · replacement cost · one-time cost · net value'],['Accept the evidence','Named owner · finance sign-off · source document'],['Protect the forecast','Show underlying EBITDA separately from integration value']
+          ].map(([title,copy],i)=><article key={title}><span>{String(i+1).padStart(2,'0')}</span><div><b>{title}</b><p>{copy}</p></div></article>)}</div>
+        </div>
+        <div className="integration-warning"><b>Current tracker status</b><p>The framework contains the fields needed for control, but baselines, phasing, owners, realised benefits and evidence are not yet populated. No execution percentage should be inferred.</p></div>
+      </div>}
+      <div className="integration-source">Source: FA Integration &amp; Synergy Tracker · framework structure only · financial fields pending validation</div>
+      {selectedWorkstream && <div className="activity-layer" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedWorkstream(null)}}>
+        <aside className="activity-drawer" role="dialog" aria-modal="true" aria-labelledby="activity-title">
+          <header><div><small>Integration workstream</small><h3 id="activity-title">{selectedWorkstream}</h3><p>{integrationActivities.filter(item=>item.workstream===selectedWorkstream).length} activities from the Master Tracker</p></div><button type="button" onClick={()=>setSelectedWorkstream(null)} aria-label="Close activity list">×</button></header>
+          <div className="activity-key"><span>Task</span><span>Phase</span><span>Priority</span><span>Owner</span></div>
+          <div className="activity-list">{integrationActivities.filter(item=>item.workstream===selectedWorkstream).map(item=><article key={item.id}>
+            <div className="activity-id"><b>{item.id}</b><span>{item.phase}</span></div>
+            <div className="activity-copy"><h4>{item.action}</h4><dl><div><dt>Timing</dt><dd>{item.timing}</dd></div><div><dt>Priority</dt><dd>{item.priority}</dd></div><div><dt>Accountable owner</dt><dd>{item.owner}</dd></div><div><dt>Deliverable</dt><dd>{item.deliverable || 'To be confirmed'}</dd></div></dl></div>
+          </article>)}</div>
+          <footer><b>Source control</b><p>Activities are reproduced from the FA Integration &amp; Synergy Tracker. Status remains a tracker field and is not inferred here.</p></footer>
+        </aside>
+      </div>}
+    </section>
+
     <section id="decisions" className="chapter decisions-section">
-      <div className="chapter-label"><span>06</span><p>Board decisions</p></div>
+      <div className="chapter-label"><span>08</span><p>Board decisions</p></div>
       <div className="decision-intro"><p>The ask is not approval of a static forecast.</p><h2>Approve the controls<br/>that make the ambition <em>investable.</em></h2></div>
       <div className="decision-list">
         {[
@@ -228,7 +554,7 @@ export default function Home() {
           ["Commission the downside case","Model -20% UK revenue, -15% FLA headcount and 15% AI adoption.","Next Board"],
         ].map(([title,copy,timing],i)=><article key={title}><span>{String(i+1).padStart(2,"0")}</span><h3>{title}</h3><p>{copy}</p><b>{timing}</b></article>)}
       </div>
-      <div className="close"><div><img src="/tf-logo-mark.png" alt="Talent Formula"/><b>FY2026-27 Board Plan</b></div><p>Scale the platform.<br/>Protect the downside.</p></div>
+      <div className="close"><div><img src="./tf-logo-mark.png" alt="Talent Formula"/><b>FY2026-27 Board Plan</b></div><p>Scale the platform.<br/>Protect the downside.</p></div>
     </section>
     {currentDetail && <div className="drawer-layer" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setSelected(null)}}>
       <aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
@@ -251,7 +577,7 @@ export default function Home() {
             <article><span>01</span><b>Accountant shortage</b><strong>~10%</strong><p>decline in the US accounting workforce from 2019-2024, with similar structural gaps across Australia and the UK.</p></article>
             <article><span>02</span><b>AI adoption inflection</b><strong>41%</strong><p>projected CAGR for AI in accounting through 2030 as firms seek AI-enabled delivery partners.</p></article>
             <article><span>03</span><b>Outsourcing acceleration</b><strong>30-35%</strong><p>of small and mid-size US CPA firms now use offshore outsourcing, with adoption accelerating.</p></article>
-          </div><div className="timing-strip"><b>The window</b><p>Clients want cost relief and automation together. Competitors typically offer one or the other; Talent Formula is assembling both under one contract.</p></div></section>}
+          </div><div className="timing-strip"><b>The window</b><p>Clients want cost relief and automation together. Competitors typically offer one or the other; Talent Formula is assembling both under one contract.</p></div><div className="people-evidence"><small>Why Talent Formula is ready now</small><b>87% satisfaction · 95% enablement</b><p>The market window does not require a cultural turnaround first. Employees already report the autonomy, resources and ownership needed to absorb growth and new technology.</p><a href="#people" onClick={()=>setGrowthOpen(false)}>People readiness →</a></div></section>}
           {growthTab==="different" && <section className="budget-different"><div className="growth-title"><small>Why this budget is different</small><h3>Not an extrapolation.<br/>A <em>new operating system.</em></h3><p>Most budgets extend yesterday's run rate. This one brings three growth engines online together and changes how the group creates revenue, margin and strategic value.</p></div><div className="difference-hero"><div><small>The shift</small><h4>From three adjacent businesses<br/>to one reinforcing platform.</h4></div><strong>3×</strong><p>growth engines operating simultaneously for the first time</p></div><div className="difference-grid">
             <article><span>01</span><div><small>FA / FLA</small><h4>Scale plus a digital margin layer</h4><p>Managed-service headcount grows on top of proven delivery infrastructure, while digital revenue expands margin without requiring the same increase in physical delivery cost.</p></div><b>620 → 761 FTEs</b></article>
             <article><span>02</span><div><small>Talent Formula</small><h4>Geographic growth, not just volume growth</h4><p>The recruitment engine moves beyond the existing base into the UK and emerging US opportunity, diversifying revenue and improving access to higher-rate markets.</p></div><b>+38.5% YoY</b></article>
@@ -272,7 +598,8 @@ export default function Home() {
               ["AI-first operating model","54.6% gross margin","AI Digital is embedded in how the group services clients rather than sold as an unrelated bolt-on. The platform is already deployed across the FA and TF client base.","Every deployment produces workflow learning: more clients create more data, better automation and stronger retention.","A high-margin digital layer can compound on top of the existing delivery base at low marginal cost."],
               ["Recruitment engine","AUD · UK · US","TF can source, assess and place accounting talent across Australia, the UK and emerging US markets. This capability directly supports FA's planned scale to 968 FTEs in FY27/28.","Speed and cross-market reach create a practical moat that captive or local providers struggle to reproduce.","The same engine supports organic growth, acquisition integration and new-market entry."],
               ["Client relationships & implementation","410 combined clients","FA's 180+ managed-service clients, TF's 50+ active clients and the Backroom client base create a combined distribution channel for AI Digital.","The group is upselling trusted relationships rather than acquiring SaaS customers through cold prospecting.","Near-zero incremental customer-acquisition cost makes AI adoption more defensible than a greenfield SaaS model."],
-              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."]
+              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."],
+              ["Culture built for execution","95% enabled","The 2025 employee survey records 95% enablement, 95% teamwork and ownership, 94% work-life blend and 87% overall satisfaction.","Tools and pricing can be copied more easily than a high-trust culture that combines autonomy, accountability and domain delivery.","The group can pursue FA scale, geographic growth and AI adoption without first requiring a cultural turnaround."]
             ].map(([title,proof,detail,difference,value],i)=><button key={title} type="button" className={moatOpen===title?"active":""} onClick={()=>setMoatOpen(title)}><span>{String(i+1).padStart(2,"0")}</span><b>{title}</b><small>{proof}</small><i>→</i></button>)}
           </div>{[
               ["Accounting specialisation","761 FLA specialists","We do not serve every industry—we go deep in accounting. FA/FLA's 761 specialist offshore accountants are trained on local compliance frameworks and delivery requirements.","Generalist offshore providers cannot match the same domain depth and quality consistency.","Specialisation supports premium pricing, stronger client trust and higher retention."],
@@ -280,7 +607,8 @@ export default function Home() {
               ["AI-first operating model","54.6% gross margin","AI Digital is embedded in how the group services clients rather than sold as an unrelated bolt-on. The platform is already deployed across the FA and TF client base.","Every deployment produces workflow learning: more clients create more data, better automation and stronger retention.","A high-margin digital layer can compound on top of the existing delivery base at low marginal cost."],
               ["Recruitment engine","AUD · UK · US","TF can source, assess and place accounting talent across Australia, the UK and emerging US markets. This capability directly supports FA's planned scale to 968 FTEs in FY27/28.","Speed and cross-market reach create a practical moat that captive or local providers struggle to reproduce.","The same engine supports organic growth, acquisition integration and new-market entry."],
               ["Client relationships & implementation","410 combined clients","FA's 180+ managed-service clients, TF's 50+ active clients and the Backroom client base create a combined distribution channel for AI Digital.","The group is upselling trusted relationships rather than acquiring SaaS customers through cold prospecting.","Near-zero incremental customer-acquisition cost makes AI adoption more defensible than a greenfield SaaS model."],
-              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."]
+              ["People + AI integration","One integrated contract","Talent Formula combines specialist offshore accounting talent with a purpose-built AI platform in one operating model and one client proposition.","Pure-play staffing lacks proprietary automation; pure-play SaaS lacks domain delivery capability and implementation depth.","Clients receive expert humans and intelligent automation together, increasing value, stickiness and share of wallet."],
+              ["Culture built for execution","95% enabled","The 2025 employee survey records 95% enablement, 95% teamwork and ownership, 94% work-life blend and 87% overall satisfaction.","Tools and pricing can be copied more easily than a high-trust culture that combines autonomy, accountability and domain delivery.","The group can pursue FA scale, geographic growth and AI adoption without first requiring a cultural turnaround."]
             ].filter(([title])=>title===moatOpen).map(([title,proof,detail,difference,value])=><div className="moat-stage" key={title}><div className="moat-stage-head"><small>Selected advantage</small><h4>{title}</h4><strong>{proof}</strong></div><div className="moat-stage-grid"><div><small>Operational proof</small><p>{detail}</p></div><div><small>Why it is different</small><p>{difference}</p></div><div className="value"><small>Strategic value</small><p>{value}</p></div></div></div>)}<div className="moat-proof"><span>More clients</span><i>→</i><span>More workflow data</span><i>→</i><span>Better AI</span><i>→</i><span>Higher retention</span></div></section>}
           {growthTab==="priorities" && <section className="growth-priorities"><div className="growth-title"><small>FY2027 priorities</small><h3>Turn the thesis into<br/><em>sequenced execution.</em></h3><p>Growth depends on a small number of linked moves. Expand each priority to see why it matters, the evidence behind it and the proof point the Board should require.</p></div><div className="priority-evidence-list">
             {[
@@ -302,9 +630,19 @@ export default function Home() {
               ["FX exposure","Medium","Material GBP/AUD and INR/AUD exposure with flat-rate planning assumptions.","GBP/AUD or INR/AUD moves beyond the approved 5% sensitivity band.","CFO","Implement rolling six-month GBP/AUD cover, match currency inflows and outflows where possible and reprice exposed contracts at renewal.","Quarterly hedged-versus-unhedged position and 5% sensitivity in every Board pack."]
             ].map(([title,level,risk,trigger,owner,response,monitoring])=><article key={title} className={riskOpen===title?"open":""}><button type="button" className="risk-summary" onClick={()=>setRiskOpen(riskOpen===title?null:title)} aria-expanded={riskOpen===title}><span><h4>{title}</h4><em className={level.toLowerCase()}>{level}</em></span><p>{risk}</p><i>{riskOpen===title?"−":"+"}</i></button>{riskOpen===title&&<div className="risk-response"><div><small>Trigger</small><p>{trigger}</p></div><div><small>Accountable owner</small><p>{owner}</p></div><div className="response-main"><small>How we address it</small><p>{response}</p></div><div><small>Board monitoring</small><p>{monitoring}</p></div></div>}</article>)}
           </div></section>}
+          {growthTab in cultureEvidence && <div className="people-evidence"><small>{cultureEvidence[growthTab as keyof typeof cultureEvidence].label}</small><b>{cultureEvidence[growthTab as keyof typeof cultureEvidence].metric}</b><p>{cultureEvidence[growthTab as keyof typeof cultureEvidence].copy}</p><a href="#people" onClick={()=>setGrowthOpen(false)}>Explore people readiness →</a></div>}
         </div>
         <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
       </div>
+    </div>}
+    <button type="button" className="chat-launcher" onClick={()=>setChatOpen(true)} aria-label="Ask Alan"><span>A</span><b>Ask Alan</b></button>
+    {chatOpen && <div className="chat-scrim" onMouseDown={(event)=>{if(event.target===event.currentTarget)setChatOpen(false)}}>
+      <aside className="strategy-chat" role="dialog" aria-modal="true" aria-labelledby="strategy-chat-title">
+        <header><div><small>Alan · Board evidence assistant</small><h2 id="strategy-chat-title">Ask Alan</h2><p>Answers are limited to the approved board evidence.</p><div className="grounded-badge"><i/>Grounded mode · unsupported answers refused</div></div><div className="chat-head-actions"><button type="button" className={voiceEnabled?"voice-on":""} onClick={()=>{setVoiceEnabled(value=>!value);window.speechSynthesis?.cancel()}} aria-label={voiceEnabled?"Turn Alan’s voice off":"Turn Alan’s voice on"}>{voiceEnabled?"🔊":"🔇"}</button><button type="button" onClick={()=>setChatOpen(false)} aria-label="Close Alan">×</button></div></header>
+        <div className="chat-prompts" aria-label="Suggested questions">{["Why is this budget different?","How do $40.2M and $42.4M reconcile?","What could break the case?","How does culture support growth?"].map(prompt=><button key={prompt} type="button" onClick={()=>askStrategy(prompt)}>{prompt}</button>)}</div>
+        <div className="chat-thread" aria-live="polite">{chatMessages.map((message,index)=><article key={`${message.role}-${index}`} className={`${message.role}${message.view?" has-view":""}`}><small>{message.role==="assistant"?"Alan":"You"}</small>{message.view==="financial-changes"?<FinancialChangesView/>:<p>{message.text}</p>}{message.sources?.length?<div className="chat-sources"><b>Evidence</b>{message.sources.map(source=><span key={source}>{source}</span>)}</div>:null}</article>)}</div>
+        <form onSubmit={(event)=>{event.preventDefault();askStrategy()}}><label htmlFor="strategy-question">Ask Alan a board question</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder="Ask Alan by voice or type a question…" rows={2}/><button type="button" className={`mic-button${isListening?" listening":""}`} onClick={toggleListening} aria-label={isListening?"End Alan realtime conversation":"Start a realtime voice conversation with Alan"}>{isListening?"■":"●"}</button><button type="submit" disabled={!chatInput.trim()}>Ask →</button></div><span className="voice-status">{voiceStatus}</span><small>Alan realtime voice · grounded in approved Board evidence · press stop to end the conversation</small></form>
+      </aside>
     </div>}
     <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · FY2026–29 growth strategy</span></footer>
   </main>;

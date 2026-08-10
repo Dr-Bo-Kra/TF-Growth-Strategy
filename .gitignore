@@ -28,6 +28,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 dev.*.log
+local-preview.log
+.gh-auth/
+gh-auth-session*.log
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -36,6 +39,7 @@ dev.*.log
 .vercel
 
 /dist/
+/pages-dist/
 /.wrangler/
 /outputs/
 /work/
