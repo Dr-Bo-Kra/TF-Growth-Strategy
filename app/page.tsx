@@ -285,28 +285,31 @@ export default function Home() {
     setVoiceStatus("Realtime conversation ended");
   };
 
-  const sendRealtimeText = () => {
+  const sendTextOverChannel = (channel: RTCDataChannel, clean: string) => {
+    channel.send(JSON.stringify({type:"conversation.item.create",item:{type:"message",role:"user",content:[{type:"input_text",text:clean}]}}));
+    channel.send(JSON.stringify({type:"response.create"}));
+  };
+
+  const sendRealtimeText = async () => {
     const clean = chatInput.trim();
     const channel = realtimeChannelRef.current;
     if (!clean) return;
-    if (!channel || channel.readyState !== "open") {
-      setVoiceStatus("Start the conversation first, then you can speak or type.");
+    setChatMessages(items => [...items, { role:"user", text:clean }]);
+    setChatInput("");
+    if (channel?.readyState === "open") {
+      sendTextOverChannel(channel, clean);
+      setVoiceStatus("Alan is thinking…");
       return;
     }
-    setChatMessages(items => [...items, { role:"user", text:clean }]);
-    channel.send(JSON.stringify({type:"conversation.item.create",item:{type:"message",role:"user",content:[{type:"input_text",text:clean}]}}));
-    channel.send(JSON.stringify({type:"response.create"}));
-    setChatInput("");
-    setVoiceStatus("Alan is thinking…");
+    await startRealtime(false, clean);
   };
 
-  const toggleListening = async () => {
-    if (isListening) { stopRealtimeVoice(); return; }
-    if (!navigator.mediaDevices?.getUserMedia || typeof RTCPeerConnection === "undefined") {
+  const startRealtime = async (enableVoice: boolean, initialText?: string) => {
+    if (typeof RTCPeerConnection === "undefined" || (enableVoice && !navigator.mediaDevices?.getUserMedia)) {
       setVoiceStatus("Realtime voice requires a current version of Chrome, Edge or Safari.");
       return;
     }
-    setVoiceStatus("Connecting securely to Alan…");
+    setVoiceStatus(enableVoice ? "Connecting securely to Alan…" : "Connecting Alan for your typed question…");
     try {
       const tokenResponse = await fetch("https://xryrekfeuknlqmidekww.supabase.co/functions/v1/alan-realtime-token", {
         method: "POST",
@@ -319,15 +322,20 @@ export default function Home() {
       const remoteAudio = new Audio();
       remoteAudio.autoplay = true;
       peer.ontrack = event => { remoteAudio.srcObject = event.streams[0]; };
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const stream = enableVoice ? await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-      });
-      stream.getTracks().forEach(track => peer.addTrack(track, stream));
+      }) : null;
+      stream?.getTracks().forEach(track => peer.addTrack(track, stream));
 
       const channel = peer.createDataChannel("oai-events");
       channel.addEventListener("open", () => {
-        setIsListening(true);
-        setVoiceStatus("Alan is listening — speak naturally and take your time");
+        setIsListening(enableVoice);
+        if (initialText) {
+          sendTextOverChannel(channel, initialText);
+          setVoiceStatus("Alan is thinking…");
+        } else {
+          setVoiceStatus(enableVoice ? "Alan is listening — speak naturally and take your time" : "Alan is ready for typed questions");
+        }
       });
       channel.addEventListener("message", event => {
         const message = JSON.parse(event.data) as {type?:string;transcript?:string;error?:{message?:string}};
@@ -361,6 +369,12 @@ export default function Home() {
       stopRealtimeVoice();
       setVoiceStatus(error instanceof Error ? error.message : "Unable to start realtime voice");
     }
+  };
+
+  const toggleListening = async () => {
+    if (isListening) { stopRealtimeVoice(); return; }
+    if (realtimeChannelRef.current) stopRealtimeVoice();
+    await startRealtime(true);
   };
 
   return <main className={`section-${active}`}>
@@ -683,13 +697,13 @@ export default function Home() {
         <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
       </div>
     </div>}
-    <button type="button" className="chat-launcher" onClick={()=>setChatOpen(true)} aria-label="Talk with Alan"><span>A</span><b>Talk with Alan</b></button>
+    <button type="button" className="chat-launcher" onClick={()=>setChatOpen(true)} aria-label="Ask Alan, Virtual CFO"><span>A</span><b>Ask Alan <em>(Virtual CFO)</em></b></button>
     {chatOpen && <div className="chat-scrim" onMouseDown={(event)=>{if(event.target===event.currentTarget){stopRealtimeVoice();setChatOpen(false)}}}>
       <aside className="strategy-chat" role="dialog" aria-modal="true" aria-labelledby="strategy-chat-title">
-        <header><div><small>Alan · Realtime Board conversation</small><h2 id="strategy-chat-title">Talk with Alan</h2><p>A natural, continuous conversation grounded in the approved Board evidence.</p><div className="grounded-badge"><i/>Realtime grounded mode · asks before assuming</div></div><div className="chat-head-actions"><button type="button" onClick={()=>{stopRealtimeVoice();setChatOpen(false)}} aria-label="Close Alan">×</button></div></header>
+        <header><div><small>Alan · Virtual CFO</small><h2 id="strategy-chat-title">Ask Alan <em>(Virtual CFO)</em></h2><p>A natural, continuous conversation grounded in the approved Board evidence.</p><div className="grounded-badge"><i/>Realtime grounded mode · asks before assuming</div></div><div className="chat-head-actions"><button type="button" onClick={()=>{stopRealtimeVoice();setChatOpen(false)}} aria-label="Close Alan">×</button></div></header>
         <div className="conversation-control"><button type="button" className={isListening?"active":""} onClick={toggleListening}><i aria-hidden="true"/>{isListening?"End conversation":"Start conversation"}</button><span>{voiceStatus}</span></div>
         <div className="chat-thread" aria-live="polite">{chatMessages.map((message,index)=><article key={`${message.role}-${index}`} className={`${message.role}${message.view?" has-view":""}`}><small>{message.role==="assistant"?"Alan":"You"}</small>{message.view==="financial-changes"?<FinancialChangesView/>:<p>{message.text}</p>}{message.sources?.length?<div className="chat-sources"><b>Evidence</b>{message.sources.map(source=><span key={source}>{source}</span>)}</div>:null}</article>)}</div>
-        <form onSubmit={(event)=>{event.preventDefault();sendRealtimeText()}}><label htmlFor="strategy-question">Type during the conversation</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder={isListening?"Type a follow-up, or simply keep speaking…":"Start the conversation to speak or type…"} rows={2} disabled={!isListening}/><button type="submit" disabled={!isListening||!chatInput.trim()}>Send →</button></div><small>Low-eagerness turn detection lets you pause naturally. You can interrupt Alan at any time.</small></form>
+        <form onSubmit={(event)=>{event.preventDefault();void sendRealtimeText()}}><label htmlFor="strategy-question">Ask Alan by typing or voice</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} onKeyDown={event=>{if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();void sendRealtimeText()}}} placeholder="Type your Board question here…" rows={2}/><button type="submit" disabled={!chatInput.trim()}>Send →</button></div><small>Press Enter to send; use Shift + Enter for a new line. Voice remains optional.</small></form>
       </aside>
     </div>}
     <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · FY2026–29 growth strategy</span></footer>
