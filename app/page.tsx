@@ -221,10 +221,9 @@ export default function Home() {
   const [infraOpen, setInfraOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"I’m Alan, your Board evidence assistant. Ask me about the growth case, assumptions, KPIs, risks, priorities, people readiness or how the uploaded dashboard reconciles to the revised Board case. I’ll answer only from approved evidence and show the source."}]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"Hello, I’m Alan. Start the conversation and speak naturally—or type while we’re connected. I’ll stay within the approved Board evidence and ask a clarifying question when your request is ambiguous."}]);
   const [isListening, setIsListening] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [voiceStatus, setVoiceStatus] = useState("Ready for a realtime conversation");
+  const [voiceStatus, setVoiceStatus] = useState("Ready when you are");
   const realtimePeerRef = useRef<RTCPeerConnection | null>(null);
   const realtimeChannelRef = useRef<RTCDataChannel | null>(null);
   const realtimeStreamRef = useRef<MediaStream | null>(null);
@@ -268,26 +267,6 @@ export default function Home() {
     rows:([["Adoption rate",scenarios[scenario].adoption],["Clients converted",scenarios[scenario].clients],["Gross profit",scenarioReference.gp],["EBITDA",scenarioReference.ebitda]] as [string,string][]),
     assumption:"Eligible clients enter the funnel in phases: TF first, FA from September and Backroom from month 7 in the KPI budget model.", action:"Compare actual conversions, live customers, MRR and revenue per customer with this case every month.", source:"KPI Analysis · AI Digital adoption scenarios"
   } : selected ? drilldowns[selected] : null;
-  const askStrategy = (question = chatInput) => {
-    const clean = question.trim();
-    if (!clean) return;
-    const answer = answerStrategy(clean);
-    setChatMessages(messages=>[...messages,{role:"user",text:clean},{role:"assistant",text:answer.text,sources:answer.sources,view:"view" in answer?answer.view:undefined}]);
-    setChatInput("");
-    if (voiceEnabled && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const spoken = "view" in answer ? "I have prepared the complete year on year revenue and expense comparison as a structured table on screen." : answer.text;
-      const utterance = new SpeechSynthesisUtterance(spoken);
-      const voices = window.speechSynthesis.getVoices();
-      utterance.voice = voices.find(voice=>/natural|premium|enhanced/i.test(voice.name) && /^en[-_]/i.test(voice.lang))
-        || voices.find(voice=>/^en-(AU|GB)/i.test(voice.lang))
-        || voices.find(voice=>/^en[-_]/i.test(voice.lang))
-        || null;
-      utterance.rate = 0.94;
-      utterance.pitch = 0.96;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
   const stopRealtimeVoice = () => {
     realtimeChannelRef.current?.close();
     realtimePeerRef.current?.close();
@@ -299,6 +278,21 @@ export default function Home() {
     realtimeAudioRef.current = null;
     setIsListening(false);
     setVoiceStatus("Realtime conversation ended");
+  };
+
+  const sendRealtimeText = () => {
+    const clean = chatInput.trim();
+    const channel = realtimeChannelRef.current;
+    if (!clean) return;
+    if (!channel || channel.readyState !== "open") {
+      setVoiceStatus("Start the conversation first, then you can speak or type.");
+      return;
+    }
+    setChatMessages(items => [...items, { role:"user", text:clean }]);
+    channel.send(JSON.stringify({type:"conversation.item.create",item:{type:"message",role:"user",content:[{type:"input_text",text:clean}]}}));
+    channel.send(JSON.stringify({type:"response.create"}));
+    setChatInput("");
+    setVoiceStatus("Alan is thinking…");
   };
 
   const toggleListening = async () => {
@@ -368,7 +362,7 @@ export default function Home() {
     <header className="masthead">
       <a className="wordmark" href="#thesis"><img src="./tf-logo-wide.png" alt="Talent Formula" /></a>
       <div className="confidential">Confidential · FY2026-27</div>
-      <div className="header-actions"><button type="button" className="ask-strategy-top" onClick={()=>setChatOpen(true)}>Ask Alan <span>?</span></button><button type="button" onClick={()=>setGrowthOpen(true)}>Growth case <span>+</span></button><a className="jump" href="#decisions">Board asks <span>↘</span></a></div>
+      <div className="header-actions"><button type="button" onClick={()=>setGrowthOpen(true)}>Growth case <span>+</span></button><a className="jump" href="#decisions">Board asks <span>↘</span></a></div>
     </header>
 
     <aside className="rail" aria-label="Board plan chapters">
@@ -683,13 +677,13 @@ export default function Home() {
         <footer className="growth-foot"><span>Use the tabs to move through the growth case</span><button type="button" onClick={()=>setGrowthOpen(false)}>Return to board plan</button></footer>
       </div>
     </div>}
-    <button type="button" className="chat-launcher" onClick={()=>setChatOpen(true)} aria-label="Ask Alan"><span>A</span><b>Ask Alan</b></button>
-    {chatOpen && <div className="chat-scrim" onMouseDown={(event)=>{if(event.target===event.currentTarget)setChatOpen(false)}}>
+    <button type="button" className="chat-launcher" onClick={()=>setChatOpen(true)} aria-label="Talk with Alan"><span>A</span><b>Talk with Alan</b></button>
+    {chatOpen && <div className="chat-scrim" onMouseDown={(event)=>{if(event.target===event.currentTarget){stopRealtimeVoice();setChatOpen(false)}}}>
       <aside className="strategy-chat" role="dialog" aria-modal="true" aria-labelledby="strategy-chat-title">
-        <header><div><small>Alan · Board evidence assistant</small><h2 id="strategy-chat-title">Ask Alan</h2><p>Answers are limited to the approved board evidence.</p><div className="grounded-badge"><i/>Grounded mode · unsupported answers refused</div></div><div className="chat-head-actions"><button type="button" className={voiceEnabled?"voice-on":""} onClick={()=>{setVoiceEnabled(value=>!value);window.speechSynthesis?.cancel()}} aria-label={voiceEnabled?"Turn Alan’s voice off":"Turn Alan’s voice on"}>{voiceEnabled?"🔊":"🔇"}</button><button type="button" onClick={()=>setChatOpen(false)} aria-label="Close Alan">×</button></div></header>
-        <div className="chat-prompts" aria-label="Suggested questions">{["Why is this budget different?","How do $40.2M and $42.4M reconcile?","What could break the case?","How does culture support growth?"].map(prompt=><button key={prompt} type="button" onClick={()=>askStrategy(prompt)}>{prompt}</button>)}</div>
+        <header><div><small>Alan · Realtime Board conversation</small><h2 id="strategy-chat-title">Talk with Alan</h2><p>A natural, continuous conversation grounded in the approved Board evidence.</p><div className="grounded-badge"><i/>Realtime grounded mode · asks before assuming</div></div><div className="chat-head-actions"><button type="button" onClick={()=>{stopRealtimeVoice();setChatOpen(false)}} aria-label="Close Alan">×</button></div></header>
+        <div className="conversation-control"><button type="button" className={isListening?"active":""} onClick={toggleListening}><i aria-hidden="true"/>{isListening?"End conversation":"Start conversation"}</button><span>{voiceStatus}</span></div>
         <div className="chat-thread" aria-live="polite">{chatMessages.map((message,index)=><article key={`${message.role}-${index}`} className={`${message.role}${message.view?" has-view":""}`}><small>{message.role==="assistant"?"Alan":"You"}</small>{message.view==="financial-changes"?<FinancialChangesView/>:<p>{message.text}</p>}{message.sources?.length?<div className="chat-sources"><b>Evidence</b>{message.sources.map(source=><span key={source}>{source}</span>)}</div>:null}</article>)}</div>
-        <form onSubmit={(event)=>{event.preventDefault();askStrategy()}}><label htmlFor="strategy-question">Ask Alan a board question</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder="Ask Alan by voice or type a question…" rows={2}/><button type="button" className={`mic-button${isListening?" listening":""}`} onClick={toggleListening} aria-label={isListening?"End Alan realtime conversation":"Start a realtime voice conversation with Alan"}>{isListening?"■":"●"}</button><button type="submit" disabled={!chatInput.trim()}>Ask →</button></div><span className="voice-status">{voiceStatus}</span><small>Alan realtime voice · grounded in approved Board evidence · press stop to end the conversation</small></form>
+        <form onSubmit={(event)=>{event.preventDefault();sendRealtimeText()}}><label htmlFor="strategy-question">Type during the conversation</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} placeholder={isListening?"Type a follow-up, or simply keep speaking…":"Start the conversation to speak or type…"} rows={2} disabled={!isListening}/><button type="submit" disabled={!isListening||!chatInput.trim()}>Send →</button></div><small>Low-eagerness turn detection lets you pause naturally. You can interrupt Alan at any time.</small></form>
       </aside>
     </div>}
     <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · FY2026–29 growth strategy</span></footer>
