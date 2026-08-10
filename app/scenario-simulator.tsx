@@ -29,7 +29,7 @@ export default function ScenarioSimulator() {
     const base = {
       revenue: 42.0,
       grossProfit: 15.8,
-      ebitda: 5.15,
+      ebitda: 5.739545,
       faRevenue: 25.7,
       aiRevenue: 2.133705,
       aiGrossProfit: 1.16463,
@@ -76,7 +76,7 @@ export default function ScenarioSimulator() {
 
   const update = (key: keyof Inputs, value: number) => setInputs(current => ({ ...current, [key]: value }));
   const deltaRevenue = result.revenue - 42.0;
-  const deltaEbitda = result.ebitda - 5.15;
+  const deltaEbitda = result.ebitda - 5.739545;
 
   return <section className={`board-simulator ${open ? "open" : ""}`} aria-labelledby="simulator-title">
     <button className="simulator-entry" type="button" onClick={() => setOpen(value => !value)} aria-expanded={open}>
@@ -109,11 +109,11 @@ export default function ScenarioSimulator() {
             <article><small>Group revenue</small><strong>{money(result.revenue)}</strong><span className={deltaRevenue >= 0 ? "positive" : "negative"}>{signedMoney(deltaRevenue)} vs approved</span></article>
             <article><small>Gross profit</small><strong>{money(result.grossProfit)}</strong><span>Approved: $15.80M</span></article>
             <article className="primary"><small>Post-synergy EBITDA</small><strong>{money(result.ebitda)}</strong><span className={deltaEbitda >= 0 ? "positive" : "negative"}>{signedMoney(deltaEbitda)} vs approved</span></article>
-            <article><small>EBITDA margin</small><strong>{result.margin.toFixed(1)}%</strong><span>Approved: 12.3%</span></article>
+            <article><small>EBITDA margin</small><strong>{result.margin.toFixed(1)}%</strong><span>Approved: 13.7%</span></article>
           </div>
 
           <div className="simulator-bridge">
-            <header><small>EBITDA bridge from the approved case</small><b>$5.15M baseline</b></header>
+            <header><small>EBITDA bridge from the approved case</small><b>$5.74M baseline</b></header>
             {result.bridge.map(item => <div key={item.label}><span>{item.label}</span><i><em className={item.value >= 0 ? "positive" : "negative"} style={{ width: `${Math.min(100, Math.max(4, Math.abs(item.value) / 2.5 * 100))}%` }} /></i><b className={item.value >= 0 ? "positive" : "negative"}>{signedMoney(item.value)}</b></div>)}
           </div>
 
@@ -126,7 +126,7 @@ export default function ScenarioSimulator() {
 
       <footer className="simulator-method">
         <b>Calculation method</b>
-        <p>FA revenue flexes with headcount and utilisation; FA gross-profit sensitivity uses the 30.2% margin. The UK control uses the documented $250k EBITDA exposure for each 20% plan miss. AI revenue and gross profit scale with adoption while the $575k below-GP allocation remains fixed. Realised synergies replace the approved $1.65M register proportionally.</p>
+        <p>The approved full-group baseline is $3.50M TF+FA pre-synergy EBITDA + $590k AI Digital EBITDA + $1.65M synergies = $5.74M. FA revenue flexes with headcount and utilisation; FA gross-profit sensitivity uses the 30.2% margin. The UK control uses the documented $250k EBITDA exposure for each 20% plan miss. AI revenue and gross profit scale with adoption while the $575k below-GP allocation remains fixed. Realised synergies replace the approved $1.65M register proportionally.</p>
         <span>Model status: management sensitivity · approved case anchored · assumptions require Board validation</span>
       </footer>
     </div> : null}
