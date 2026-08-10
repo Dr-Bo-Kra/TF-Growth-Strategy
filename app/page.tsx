@@ -489,7 +489,7 @@ export default function Home() {
       <div className="chapter-label"><span>07</span><p>Integration framework</p></div>
       <div className="integration-intro">
         <div><small>Frontline Accounting integration</small><h2>Turn the acquisition<br/>into <em>controlled value.</em></h2></div>
-        <p>The tracker adds the execution system behind the strategy: sequenced phases, accountable workstreams and evidence-based value governance. It does not alter the approved forecast.</p>
+        <p>The integration framework translates the strategy into sequenced phases, accountable workstreams and evidence-based value governance. It strengthens execution discipline without altering the approved forecast.</p>
       </div>
       <div className="integration-facts" aria-label="Integration framework scale">
         <article><strong>187</strong><span>integration activities</span></article>
@@ -526,18 +526,18 @@ export default function Home() {
             ['Separate the value','Cost · revenue · working capital'],['Track the state','Planned · committed · realised'],['Prove the economics','Gross benefit · replacement cost · one-time cost · net value'],['Accept the evidence','Named owner · finance sign-off · source document'],['Protect the forecast','Show underlying EBITDA separately from integration value']
           ].map(([title,copy],i)=><article key={title}><span>{String(i+1).padStart(2,'0')}</span><div><b>{title}</b><p>{copy}</p></div></article>)}</div>
         </div>
-        <div className="integration-warning"><b>Current tracker status</b><p>The framework contains the fields needed for control, but baselines, phasing, owners, realised benefits and evidence are not yet populated. No execution percentage should be inferred.</p></div>
+        <div className="integration-warning"><b>Framework readiness</b><p>The control structure is established. Baselines, phasing, owners, realised benefits and supporting evidence must be confirmed before progress or value realisation is reported.</p></div>
       </div>}
-      <div className="integration-source">Source: FA Integration &amp; Synergy Tracker · framework structure only · financial fields pending validation</div>
+      <div className="integration-source">Source: FA Integration &amp; Synergy Framework · operating structure only · financial values pending validation</div>
       {selectedWorkstream && <div className="activity-layer" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedWorkstream(null)}}>
         <aside className="activity-drawer" role="dialog" aria-modal="true" aria-labelledby="activity-title">
-          <header><div><small>Integration workstream</small><h3 id="activity-title">{selectedWorkstream}</h3><p>{integrationActivities.filter(item=>item.workstream===selectedWorkstream).length} activities from the Master Tracker</p></div><button type="button" onClick={()=>setSelectedWorkstream(null)} aria-label="Close activity list">×</button></header>
+          <header><div><small>Integration workstream</small><h3 id="activity-title">{selectedWorkstream}</h3><p>{integrationActivities.filter(item=>item.workstream===selectedWorkstream).length} activities defined in the integration framework</p></div><button type="button" onClick={()=>setSelectedWorkstream(null)} aria-label="Close activity list">×</button></header>
           <div className="activity-key"><span>Task</span><span>Phase</span><span>Priority</span><span>Owner</span></div>
           <div className="activity-list">{integrationActivities.filter(item=>item.workstream===selectedWorkstream).map(item=><article key={item.id}>
             <div className="activity-id"><b>{item.id}</b><span>{item.phase}</span></div>
             <div className="activity-copy"><h4>{item.action}</h4><dl><div><dt>Timing</dt><dd>{item.timing}</dd></div><div><dt>Priority</dt><dd>{item.priority}</dd></div><div><dt>Accountable owner</dt><dd>{item.owner}</dd></div><div><dt>Deliverable</dt><dd>{item.deliverable || 'To be confirmed'}</dd></div></dl></div>
           </article>)}</div>
-          <footer><b>Source control</b><p>Activities are reproduced from the FA Integration &amp; Synergy Tracker. Status remains a tracker field and is not inferred here.</p></footer>
+          <footer><b>Framework scope</b><p>These activities define the execution architecture for the FA integration. This view explains the framework; it does not report implementation progress.</p></footer>
         </aside>
       </div>}
     </section>
