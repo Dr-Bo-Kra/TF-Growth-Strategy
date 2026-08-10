@@ -15,6 +15,7 @@ import "./synergy-realisation.css";
 import "./people-readiness.css";
 import "./strategy-chat.css";
 import "./integration-framework.css";
+import "./ai-cost-envelope.css";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { integrationActivities } from "./integration-activities";
@@ -71,6 +72,7 @@ const strategyThemes = [
   { keywords:["culture","people","survey","employee","readiness"], answer:"The culture is an enabler of the growth case, not the constraint. The survey records 87% overall satisfaction, 95% enablement, 95% teamwork and 94% work-life blend. Management’s task is to preserve that advantage during rapid hiring and integration through clearer careers, recognition, two-way communication and visible follow-through.", sources:["Overall Satisfaction Survey 2025 · 153 responses"] },
   { keywords:["biggest risk","risks","break the case","downside"], answer:"The most material execution risks are FLA headcount delivery, the UK revenue assumption, unproven AI adoption, Talent Formula gross-margin compression, facilities commitments and FX exposure. The plan addresses them with explicit triggers, accountable owners and monthly Board monitoring.", sources:["C-Level Executive Analysis · Risk-adjusted growth case", "AI Pricing Model · Operating guardrails"] },
   { keywords:["budget different","different budget","what is different"], answer:"This budget is different because it connects growth to an operating system: three distinct engines, a phased AI pricing model, twelve leading KPIs, named risk triggers, an itemised $1.65M synergy register and measured people readiness. It also separates sourced facts, calculated targets and assumptions that still require validation.", sources:["C-Level Executive Analysis · Revised executive case", "KPI Analysis FY2026/27", "AI Pricing Model"] },
+  { keywords:["ravi","infrastructure cost","it cost","production run cost","gcp cost","ai api cost","technology cost envelope"], answer:"Ravi’s AUD $27.2k configured production run cost is already embedded within the approved ~$969k AI technology and infrastructure envelope. It is an ‘of which’ disclosure—not incremental expenditure—and must never be added again when calculating EBITDA, margin, cash requirement or break-even. Ravi’s schedule covers the configured production GCP environment, AI APIs and Atlassian at 15 users and three tenants; the broader approved envelope also funds engineering, non-production environments, enterprise systems, integrations, support and scale resilience.", sources:["TFX Budget GCP AI · Summary", "TFX Budget GCP AI · Notes & Caveats", "AI Pricing Model · fixed-cost base"] },
 ];
 
 const dashboardChangeAnswer = `Year-on-year percentage change (FY25/26→FY26/27 | FY26/27→FY27/28 | FY27/28→FY28/29)
@@ -201,6 +203,7 @@ export default function Home() {
   const [moatOpen, setMoatOpen] = useState("Accounting specialisation");
   const [integrationView, setIntegrationView] = useState<"phases"|"workstreams"|"value">("phases");
   const [selectedWorkstream, setSelectedWorkstream] = useState<string | null>(null);
+  const [infraOpen, setInfraOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"I’m Alan, your Board evidence assistant. Ask me about the growth case, assumptions, KPIs, risks, priorities, people readiness or how the uploaded dashboard reconciles to the revised Board case. I’ll answer only from approved evidence and show the source."}]);
@@ -233,11 +236,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); setChatOpen(false); setSelectedWorkstream(null); } };
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setSelected(null); setGrowthOpen(false); setChatOpen(false); setSelectedWorkstream(null); setInfraOpen(false); } };
     window.addEventListener("keydown", close);
-    document.body.style.overflow = selected || growthOpen || selectedWorkstream ? "hidden" : "";
+    document.body.style.overflow = selected || growthOpen || selectedWorkstream || infraOpen ? "hidden" : "";
     return () => { window.removeEventListener("keydown", close); document.body.style.overflow = ""; };
-  }, [selected, growthOpen, selectedWorkstream]);
+  }, [selected, growthOpen, selectedWorkstream, infraOpen]);
 
   const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${id === "ai-scenario" ? `${scenario} AI Digital scenario` : drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
   const scenarioReference = {
@@ -430,7 +433,7 @@ export default function Home() {
         <div className="scenario-lead"><span>{scenario} case</span><strong>{scenarios[scenario].adoption}</strong><p>client adoption</p></div>
         <div className="scenario-stat"><small>Clients converted</small><b>{scenarios[scenario].clients}</b></div>
         <div className="scenario-stat"><small>FY26/27 revenue</small><Drill id="ai-scenario">${scenarios[scenario].revenue.toFixed(2)}M</Drill></div>
-      <div className="scenario-stat"><small>Fixed cost base</small><b>~$969k</b></div>
+      <div className="scenario-stat"><small>Fixed cost base</small><button type="button" className="infra-entry" onClick={()=>setInfraOpen(true)} aria-label="Explore the complete AI technology cost envelope"><b>~$969k</b><i aria-hidden="true">+</i></button></div>
       <div className="scenario-stat"><small>Profitability</small><b>{scenarios[scenario].profitability}</b></div>
       </div>
       <div className="scenario-note"><b>Management response</b><p>{scenarios[scenario].note}</p></div>
@@ -564,6 +567,29 @@ export default function Home() {
         <div className="drawer-callout"><small>Key assumption</small><p>{currentDetail.assumption}</p></div>
         <div className="drawer-action"><small>Board implication</small><p>{currentDetail.action}</p></div>
         <div className="drawer-source">Source: {currentDetail.source}</div>
+      </aside>
+    </div>}
+    {infraOpen && <div className="infra-layer" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setInfraOpen(false)}}>
+      <aside className="infra-drawer" role="dialog" aria-modal="true" aria-labelledby="infra-title">
+        <header><div><small>AI Digital · cost evidence</small><h2 id="infra-title">Complete AI technology<br/>cost envelope.</h2></div><button type="button" onClick={()=>setInfraOpen(false)} aria-label="Close technology cost detail">×</button></header>
+        <div className="infra-scroll">
+          <section className="infra-relationship">
+            <article><small>Approved fixed-cost base</small><strong>~$969k</strong><p>Complete AI technology and infrastructure envelope</p></article>
+            <i aria-hidden="true">includes</i>
+            <article className="embedded"><small>Configured production run cost</small><strong>AUD $27.2k</strong><p>Ravi’s annual estimate · 15 users · 3 tenants</p></article>
+          </section>
+          <div className="infra-control"><b>Included—not incremental</b><p>The AUD $27.2k is already contained within the ~$969k approved envelope. It must not be added again to expenditure, EBITDA, cash requirement or break-even.</p></div>
+          <section className="infra-breakdown"><header><div><small>Embedded cost composition</small><h3>What the configured platform costs to run</h3></div><p>Annual AUD · based on Ravi’s 1.52 AUD/USD assumption</p></header><div>{[
+            ['GCP infrastructure','$20.3k','74.8%'],['Anthropic API','$4.0k','14.7%'],['Atlassian','$1.9k','7.0%'],['Gemini API','$0.5k','2.0%'],['OpenAI API','$0.4k','1.5%']
+          ].map(([label,value,share])=><article key={label}><span>{label}</span><b>{value}</b><small>{share}</small></article>)}</div></section>
+          <section className="gcp-composition"><header><small>Inside the GCP component</small><h3>Compute is the dominant platform driver</h3></header><div>{[
+            ['Compute',81.2,'$905/mo'],['Network',8.3,'$92/mo'],['Data',6.3,'$70/mo'],['Operations',3.2,'$36/mo'],['Storage',0.8,'$9/mo'],['Security',0.1,'$1/mo']
+          ].map(([label,share,value])=><article key={label as string}><div><b>{label}</b><span>{value}</span></div><i><em style={{width:`${share}%`}}/></i><small>{share}% of GCP</small></article>)}</div></section>
+          <section className="infra-scope"><article><small>Ravi’s configured estimate covers</small><ul><li>Production GCP environment</li><li>Anthropic, OpenAI and Gemini APIs</li><li>Jira and Confluence licences</li><li>15 users and three tenants</li></ul></article><article><small>The complete envelope additionally covers</small><ul><li>Engineering and platform capability</li><li>Non-production environments</li><li>Enterprise systems and integrations</li><li>Support, security and scale resilience</li></ul></article></section>
+          <section className="infra-resilience"><header><small>Scale and resilience considerations</small><h3>What management must validate before commitment</h3></header><div><span>Cloud SQL sizing</span><span>Database failover</span><span>Redis failover</span><span>Zonal GKE exposure</span><span>Supplier pricing</span><span>Beyond-25-seat resizing</span></div></section>
+          <div className="infra-insight"><b>Board insight</b><p>The present configured run cost is predominantly fixed cloud compute. The larger financial commitment is the broader capability required to build, secure, integrate, support and scale the commercial platform.</p></div>
+          <footer>Source: TFX_Budget_GCP_AI_Aug2026 · Summary, GCP Resources and Notes &amp; Caveats. Supporting detail only; approved financial results remain unchanged.</footer>
+        </div>
       </aside>
     </div>}
     {growthOpen && <div className="growth-layer" role="dialog" aria-modal="true" aria-labelledby="growth-title">
