@@ -15,13 +15,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FY2026-27 Board Pack | Talent Formula Group",
   description: "An original board narrative covering the four-year financial trajectory, growth engines, operating controls and decisions for Talent Formula Group.",
-  metadataBase: new URL("https://talent-formula-board-fy2627.kranthi12.chatgpt.site"),
-  openGraph: {
-    title: "Talent Formula | FY2026-27 Board Plan",
-    description: "Scale the platform. Protect the downside.",
-    images: [{ url: "/og.png", width: 1734, height: 907, alt: "Talent Formula FY2026-27 Board Plan" }],
+  metadataBase: new URL("https://dr-bo-kra.github.io/TF-Growth-Strategy/"),
+  alternates: {
+    canonical: "https://dr-bo-kra.github.io/TF-Growth-Strategy/",
   },
-  twitter: { card: "summary_large_image", images: ["/og.png"] },
+  openGraph: {
+    title: "Talent Formula | FY2026-27 Board Strategy",
+    description: "Talent Formula FY2026-27 board strategy, growth case and operating plan.",
+    url: "https://dr-bo-kra.github.io/TF-Growth-Strategy/",
+    siteName: "Talent Formula Growth Strategy",
+    type: "website",
+    images: [{ url: "https://dr-bo-kra.github.io/TF-Growth-Strategy/og.png", width: 1734, height: 907, alt: "Talent Formula FY2026-27 Board Strategy" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Talent Formula | FY2026-27 Board Strategy",
+    description: "Talent Formula FY2026-27 board strategy, growth case and operating plan.",
+    images: ["https://dr-bo-kra.github.io/TF-Growth-Strategy/og.png"],
+  },
   icons: {
     icon: "/tf-logo-mark.png",
     shortcut: "/tf-logo-mark.png",
