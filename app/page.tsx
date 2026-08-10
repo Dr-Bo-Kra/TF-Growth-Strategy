@@ -17,6 +17,7 @@ import "./strategy-chat.css";
 import "./integration-framework.css";
 import "./ai-cost-envelope.css";
 import "./rail-contrast.css";
+import "./responsive-system.css";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { integrationActivities } from "./integration-activities";
