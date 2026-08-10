@@ -19,9 +19,11 @@ import "./ai-cost-envelope.css";
 import "./rail-contrast.css";
 import "./responsive-system.css";
 import "./typography-system.css";
+import "./scenario-simulator.css";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { integrationActivities } from "./integration-activities";
+import ScenarioSimulator from "./scenario-simulator";
 
 const nav = [
   ["thesis", "01", "Thesis"], ["trajectory", "02", "Trajectory"],
@@ -450,6 +452,7 @@ export default function Home() {
       </div>
       <div className="scenario-note"><b>Management response</b><p>{scenarios[scenario].note}</p></div>
       <div className="pricing"><span>Commercial model</span><div><b>$15,000</b><small>setup · 30% of adopters</small></div><i>+</i><div><b>$2,700</b><small>platform / month · all</small></div><i>+</i><div><b>$1,800</b><small>AI employee · 30%</small></div></div>
+      <ScenarioSimulator />
     </section>
 
     <section id="operating" className="chapter operating-section">
