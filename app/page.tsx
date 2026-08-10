@@ -60,6 +60,21 @@ const drilldowns: Record<string, { eyebrow:string; title:string; value:string; s
   "ai-mrr": { eyebrow:"Direct from budget · verified", title:"AI Digital June run-rate MRR", value:"$242,483", summary:"The June run-rate comes directly from the budget worksheet after TF and FA activate in September and Backroom activates in January.", rows:[["Sep 26","$179,338"],["Jan-Jun 27","$242,483"],["Platform","$2,700 · all adopters"],["AI employee","$1,800 · 30% of adopters"]], assumption:"The budget uses segment-specific internally derived realised rates; the $15,000 setup fee applies to 30% of adopters and is excluded from MRR.", action:"Track actual MRR against the monthly build; treat September below $150k as the earliest conversion warning.", source:"AI Pricing Model · pages 7-8 · AI Digital MRR Run-Rate" },
 };
 
+const kpiEvidence: Record<string, { basis:string; publisher:string; finding:string; url?:string }> = {
+  "client-retention": { basis:"Method benchmark; exact threshold is internal", publisher:"ChartMogul · Retention Benchmarks", finding:"Customer retention should be measured on a consistent year-over-year cohort basis. Results vary materially by customer profile, so 92% is a Board guardrail—not a universal industry figure.", url:"https://help.chartmogul.com/article/138-benchmarks" },
+  "fla-turnover": { basis:"Labour-market context; not a like-for-like target", publisher:"U.S. Bureau of Labor Statistics · JOLTS 2025", finding:"BLS publishes professional-and-business-services separation rates and defines quits as voluntary departures. Geography and operating model differ, so FLA's own baseline must validate the 18% ceiling.", url:"https://www.bls.gov/news.release/jolts.t20.htm" },
+  "billing-utilisation": { basis:"External context; exact threshold is internal", publisher:"SPI Research / Kantata · 2025 PS Maturity Benchmark", finding:"The cross-sector benchmark reports 68.9% billable utilisation. The 88% FLA threshold is therefore a high-volume, fully-ramped capacity target—not a professional-services average.", url:"https://get.kantata.com/rs/677-LEJ-696/images/2025-ps-maturity-benchmark.pdf" },
+  "win-rate": { basis:"Direct external benchmark", publisher:"Loopio with APMP · 2024 RFP Trends & Benchmarks", finding:"Research across global proposal teams reported a 43% average RFP win rate for 2023. The >40% control is credible only when all decided proposals use the same denominator.", url:"https://link.loopio.com/hubfs/Content%20Pieces/Reports/2024%20RFP%20Trends%20%26%20Benchmarks%20Report%20%7C%20Loopio%20%28Digital%20Copy%29.pdf" },
+  "pipeline": { basis:"External definition; exact multiple is internal", publisher:"Salesforce Help · Pipeline Coverage", finding:"Salesforce defines coverage as open pipeline divided by the remaining quota gap. At a 40% win rate, unweighted coverage requires 2.5×; 1.5× is defensible only for consistently weighted late-stage pipeline.", url:"https://help.salesforce.com/s/articleView?id=release-notes.rn_sales_features_core_forecasts_calculated_cols.htm&language=en_US&type=5" },
+  "gp-fla": { basis:"Metric context only; value is internally calculated", publisher:"SPI Research / Kantata · 2025 PS Maturity Benchmark", finding:"External research links workforce utilisation and service profitability, but it does not provide a like-for-like GP-per-FLA figure. $10.2k comes solely from approved GP divided by planned FTE.", url:"https://get.kantata.com/rs/677-LEJ-696/images/2025-ps-maturity-benchmark.pdf" },
+  "gp-tf": { basis:"Metric context only; value is internally calculated", publisher:"SPI Research / Kantata · 2025 PS Maturity Benchmark", finding:"Professional-services benchmarks support tracking productivity with margin and utilisation; they do not validate TF's exact $22.1k result, which depends on its service mix and workforce plan.", url:"https://get.kantata.com/rs/677-LEJ-696/images/2025-ps-maturity-benchmark.pdf" },
+  "nrr-fa": { basis:"External metric standard; four-point uplift is internal", publisher:"ChartMogul · Retention Benchmarks", finding:"ChartMogul defines NRR as opening recurring revenue plus expansion less contraction and churn, and states that SaaS NRR ideally exceeds 100%. The 104% target adds an internal growth requirement.", url:"https://help.chartmogul.com/article/138-benchmarks" },
+  "nrr-ai": { basis:"External principle; 115% is an internal stretch", publisher:"ChartMogul · SaaS Retention Report", finding:"Research across more than 2,500 SaaS businesses shows wide NRR variation. Above 100% means expansion offsets losses; 115% cannot be evidenced until AI Digital has a full renewal cohort.", url:"https://chartmogul.com/reports/saas-retention-the-new-normal/" },
+  "time-to-recruit": { basis:"Direct external comparator", publisher:"SHRM · 2025 Recruiting Executives Benchmarking", finding:"SHRM reports a 44-calendar-day median time-to-fill for executive and nonexecutive roles. The <28-day KPI is therefore a materially faster internal target required by the FLA hiring ramp.", url:"https://www.shrm.org/content/dam/en/shrm/research/2025-recruiting-benchmarking-report.pdf" },
+  "ai-active-customers": { basis:"No applicable external benchmark", publisher:"Evidence status · Internal adoption model", finding:"124 equals 30% modelled adoption across 410 eligible relationships. Board confidence must come from signed pilots, funnel conversion and live customers—not an unrelated market statistic." },
+  "ai-mrr": { basis:"External metric definition; value is internal", publisher:"Stripe · Monthly Recurring Revenue explained", finding:"Stripe defines MRR as predictable monthly recurring income and distinguishes it from one-time setup charges. This supports the treatment of setup revenue, but not the 124-customer assumption.", url:"https://stripe.com/resources/more/what-is-monthly-recurring-revenue" },
+};
+
 type ChatMessage = { role:"assistant"|"user"; text:string; sources?:string[]; view?:"financial-changes" };
 type VoiceRecognition = {lang:string;continuous:boolean;interimResults:boolean;start:()=>void;stop:()=>void;onresult:((event:{results:ArrayLike<{0:{transcript:string};isFinal:boolean}>})=>void)|null;onerror:((event:{error:string})=>void)|null;onend:(()=>void)|null};
 
@@ -448,6 +463,7 @@ export default function Home() {
         <div className="kpi-board">
           {[ ["Client retention",">92%","client-retention"],["FLA turnover","<18%","fla-turnover"],["FLA billing utilisation",">88%","billing-utilisation"],["Proposal win rate",">40%","win-rate"],["Pipeline coverage","1.5×","pipeline"],["GP per FLA FTE","$10.2k","gp-fla"],["GP per TF FTE","$22.1k","gp-tf"],["FA managed NRR",">104%","nrr-fa"],["AI Digital NRR",">115%","nrr-ai"],["Time to recruit","<28 days","time-to-recruit"],["AI active customers","124","ai-active-customers"],["AI run-rate MRR","$242k","ai-mrr"] ].map(([label,value,id],i)=>{
             const detail = drilldowns[id as keyof typeof drilldowns];
+            const evidence = kpiEvidence[id];
             return <article className="kpi-control" key={label} tabIndex={0} aria-describedby={`kpi-detail-${id}`}>
               <span className="kpi-no">{String(i+1).padStart(2,"0")}</span>
               <p className="kpi-name">{label}</p>
@@ -455,6 +471,12 @@ export default function Home() {
               <aside className="kpi-hover-window" id={`kpi-detail-${id}`} role="tooltip">
                 <header><div><small>{detail.eyebrow}</small><h3>Rationale and control</h3></div><strong>{detail.value}</strong></header>
                 <p><b>Why this threshold:</b> {detail.summary}</p>
+                <section className="kpi-evidence" aria-label="External evidence and benchmark status">
+                  <small>External evidence</small>
+                  <b>{evidence.basis}</b>
+                  <p>{evidence.finding}</p>
+                  {evidence.url ? <span className="kpi-source-ref"><strong>{evidence.publisher}</strong><em>{evidence.url}</em></span> : <span className="kpi-source-ref"><strong>{evidence.publisher}</strong></span>}
+                </section>
                 <dl>{detail.rows.map(([term,description])=><div key={term}><dt>{term}</dt><dd>{description}</dd></div>)}</dl>
                 <div className="kpi-playbook"><small>How management executes</small><p>{detail.action}</p></div>
                 <footer><span>{detail.assumption}</span><cite>{detail.source}</cite></footer>

@@ -10,7 +10,7 @@
 .kpi-meta span{font-size:10.5px;line-height:1.35;color:var(--navy);font-weight:700}
 .kpi-meta small{display:block;margin-bottom:3px;font-size:8px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted)}
 .kpi-board .kpi-cue{grid-column:2/4;margin:0;font-size:9px;line-height:1.2;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);font-weight:800}
-.kpi-hover-window{position:absolute;left:20px;top:calc(100% - 18px);z-index:60;width:min(570px,74vw);padding:24px;background:var(--navy2);color:#fff;box-shadow:0 22px 55px rgba(6,17,36,.34);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .16s ease,transform .16s ease,visibility .16s}
+.kpi-hover-window{position:absolute;left:20px;top:calc(100% - 18px);z-index:60;width:min(570px,74vw);max-height:min(86vh,760px);overflow:auto;padding:24px;background:var(--navy2);color:#fff;box-shadow:0 22px 55px rgba(6,17,36,.34);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .16s ease,transform .16s ease,visibility .16s}
 .kpi-control:nth-child(even) .kpi-hover-window{left:auto;right:20px}
 .kpi-control:nth-child(n+5) .kpi-hover-window{top:auto;bottom:calc(100% - 18px);transform:translateY(-8px)}
 .kpi-control:hover .kpi-hover-window,.kpi-control:focus .kpi-hover-window,.kpi-control:focus-within .kpi-hover-window{opacity:1;visibility:visible;transform:none}
@@ -20,6 +20,13 @@
 .kpi-hover-window header strong{font-family:Georgia,serif;font-size:30px;color:var(--orange);white-space:nowrap}
 .kpi-hover-window>p{font-size:13px;line-height:1.55;color:#c8d1df;margin:16px 0}
 .kpi-hover-window>p>b{color:var(--orange);font-weight:900}
+.kpi-evidence{margin:0 0 15px;padding:13px 14px;background:#0d2348;border-left:3px solid var(--orange)}
+.kpi-evidence>small{display:block;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.13em;color:var(--orange)}
+.kpi-evidence>b{display:block;margin-top:5px;font-size:11px;line-height:1.35;color:#fff}
+.kpi-evidence>p{margin:7px 0 9px;font-size:10.5px;line-height:1.48;color:#c8d1df}
+.kpi-source-ref{display:grid;gap:3px;padding-top:8px;border-top:1px solid #35496c}
+.kpi-source-ref strong{font-size:9px;line-height:1.35;color:#fff}
+.kpi-source-ref em{font-size:8px;line-height:1.35;font-style:normal;color:#8fa2bf;overflow-wrap:anywhere}
 .kpi-hover-window dl{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:1px solid #35496c;border-left:1px solid #35496c}
 .kpi-hover-window dl div{padding:10px 12px;border-right:1px solid #35496c;border-bottom:1px solid #35496c}
 .kpi-hover-window dt{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:#8e9bb0}
