@@ -230,9 +230,9 @@ export default function Home() {
   const realtimeStreamRef = useRef<MediaStream | null>(null);
   const realtimeAudioRef = useRef<HTMLAudioElement | null>(null);
   const scenarios = {
-    bear: { adoption: "15%", clients: "~62", revenue: 1.1, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "The pricing model states this case remains above the fixed-cost break-even point." },
+    bear: { adoption: "15%", clients: "~62", revenue: 1.066853, gp: 0.582315, ebitda: 0.00723, profitability:"$7k EBITDA · 0.7%", note: "Calculated at half the expected-case revenue and gross profit, less the unchanged $575,085 below-GP cost allocation. The bear case is only marginally above break-even." },
     expected: { adoption: "30%", clients: "124", revenue: 2.133705, gp: 1.16463, ebitda: 0.589545, profitability:"$590k EBITDA", note: "Budget case: 55 FA, 15 TF and 54 Backroom customers, phased through the year." },
-    stretch: { adoption: "45%", clients: "~185", revenue: 3.2, gp: 0, ebitda: 0, profitability:"EBITDA-positive", note: "Upside remains above the fixed-cost base; exact EBITDA is not supplied in the pricing model." },
+    stretch: { adoption: "45%", clients: "~185", revenue: 3.200558, gp: 1.746945, ebitda: 1.17186, profitability:"$1.17M EBITDA · 36.6%", note: "Calculated at 1.5 times the expected-case revenue and gross profit, less the unchanged $575,085 below-GP cost allocation." },
   };
   const cultureEvidence = {
     different:{label:"Why this plan is executable",metric:"87% overall satisfaction",copy:"The budget is supported by measured organisational readiness—not only market and financial assumptions. High enablement and ownership provide the operating foundation for three growth engines."},
@@ -259,9 +259,9 @@ export default function Home() {
 
   const Drill = ({ id, children, className = "" }: { id:string; children:ReactNode; className?:string }) => <button type="button" className={`drill ${className}`} onClick={() => setSelected(id)} aria-label={`Explore ${id === "ai-scenario" ? `${scenario} AI Digital scenario` : drilldowns[id]?.title || "metric"}`}>{children}<i aria-hidden="true">+</i></button>;
   const scenarioReference = {
-    bear: { revenue:"~$1.10M", gp:"Not quantified", ebitda:"Positive per model" },
+    bear: { revenue:"$1.07M", gp:"$582k", ebitda:"$7k · 0.7% margin" },
     expected: { revenue:"$2.13M", gp:"$1.165M", ebitda:"$590k" },
-    stretch: { revenue:"~$3.20M", gp:"Not quantified", ebitda:"Positive per model" },
+    stretch: { revenue:"$3.20M", gp:"$1.747M", ebitda:"$1.172M · 36.6% margin" },
   }[scenario];
   const currentDetail = selected === "ai-scenario" ? {
     eyebrow:`AI Digital · ${scenario} case`, title:"FY26/27 scenario revenue", value:scenarioReference.revenue, summary:scenarios[scenario].note,
