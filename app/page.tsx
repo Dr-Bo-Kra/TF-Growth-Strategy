@@ -16,6 +16,7 @@ import "./people-readiness.css";
 import "./strategy-chat.css";
 import "./integration-framework.css";
 import "./ai-cost-envelope.css";
+import "./rail-contrast.css";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { integrationActivities } from "./integration-activities";
@@ -358,7 +359,7 @@ export default function Home() {
     }
   };
 
-  return <main>
+  return <main className={`section-${active}`}>
     <header className="masthead">
       <a className="wordmark" href="#thesis"><img src="./tf-logo-wide.png" alt="Talent Formula" /></a>
       <div className="confidential">Confidential · FY2026-27</div>

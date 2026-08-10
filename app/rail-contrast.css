@@ -1,0 +1,61 @@
+/* The fixed chapter rail adopts the contrast system of the active section. */
+.rail,
+.rail a,
+.rail-line {
+  transition: color .2s ease, background-color .2s ease;
+}
+
+.rail::before {
+  content: "";
+  position: absolute;
+  inset: -12px -20px;
+  z-index: -1;
+  background: rgba(247, 243, 233, .94);
+  box-shadow: 0 12px 30px rgba(13, 35, 72, .08);
+  opacity: 0;
+  transition: opacity .2s ease, background-color .2s ease;
+}
+
+.rail:hover::before {
+  opacity: 1;
+}
+
+.section-engines .rail a {
+  color: #aebbd0;
+}
+
+.section-engines .rail-line {
+  background: #d9e1ed;
+}
+
+.section-engines .rail a.active {
+  color: #fff;
+}
+
+.section-engines .rail a.active i {
+  color: var(--orange);
+}
+
+.section-engines .rail::before {
+  background: rgba(13, 35, 72, .95);
+}
+
+.section-decisions .rail a {
+  color: rgba(18, 23, 34, .7);
+}
+
+.section-decisions .rail-line {
+  background: #171717;
+}
+
+.section-decisions .rail a.active {
+  color: #171717;
+}
+
+.section-decisions .rail a.active i {
+  color: #fff;
+}
+
+.section-decisions .rail::before {
+  background: rgba(255, 106, 19, .96);
+}
