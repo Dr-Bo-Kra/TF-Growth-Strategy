@@ -27,10 +27,10 @@ export default function ScenarioSimulator() {
 
   const result = useMemo(() => {
     const base = {
-      revenue: 42.0,
-      grossProfit: 15.8,
-      ebitda: 6.074545,
-      faRevenue: 25.7,
+      revenue: 42.358888529,
+      grossProfit: 16.359813829,
+      ebitda: 6.074583036,
+      faRevenue: 25.672456057,
       aiRevenue: 2.133705,
       aiGrossProfit: 1.16463,
       aiEbitda: 0.589545,
@@ -75,8 +75,8 @@ export default function ScenarioSimulator() {
   }, [inputs]);
 
   const update = (key: keyof Inputs, value: number) => setInputs(current => ({ ...current, [key]: value }));
-  const deltaRevenue = result.revenue - 42.0;
-  const deltaEbitda = result.ebitda - 6.074545;
+  const deltaRevenue = result.revenue - 42.358888529;
+  const deltaEbitda = result.ebitda - 6.074583036;
 
   return <section className={`board-simulator ${open ? "open" : ""}`} aria-labelledby="simulator-title">
     <button className="simulator-entry" type="button" onClick={() => setOpen(value => !value)} aria-expanded={open}>
@@ -107,9 +107,9 @@ export default function ScenarioSimulator() {
         <div className="simulator-output">
           <div className="simulator-scorecard">
             <article><small>Group revenue</small><strong>{money(result.revenue)}</strong><span className={deltaRevenue >= 0 ? "positive" : "negative"}>{signedMoney(deltaRevenue)} vs approved</span></article>
-            <article><small>Gross profit</small><strong>{money(result.grossProfit)}</strong><span>Approved: $15.80M</span></article>
+            <article><small>Gross profit</small><strong>{money(result.grossProfit)}</strong><span>Approved: $16.36M</span></article>
             <article className="primary"><small>Post-synergy EBITDA</small><strong>{money(result.ebitda)}</strong><span className={deltaEbitda >= 0 ? "positive" : "negative"}>{signedMoney(deltaEbitda)} vs approved</span></article>
-            <article><small>EBITDA margin</small><strong>{result.margin.toFixed(1)}%</strong><span>Approved: 14.5%</span></article>
+            <article><small>EBITDA margin</small><strong>{result.margin.toFixed(1)}%</strong><span>Approved: 14.3%</span></article>
           </div>
 
           <div className="simulator-bridge">
