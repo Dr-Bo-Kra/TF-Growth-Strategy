@@ -226,6 +226,7 @@ export default function Home() {
   const [infraOpen, setInfraOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [isSendingText, setIsSendingText] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{role:"assistant",text:"Hello, I’m Alan. Start the conversation and speak naturally—or type while we’re connected. I’ll stay within the approved Board evidence and ask a clarifying question when your request is ambiguous."}]);
   const [isListening, setIsListening] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState("Ready when you are");
@@ -292,16 +293,28 @@ export default function Home() {
 
   const sendRealtimeText = async () => {
     const clean = chatInput.trim();
-    const channel = realtimeChannelRef.current;
-    if (!clean) return;
+    if (!clean || isSendingText) return;
+    const history = chatMessages.slice(-8).map(message => ({ role:message.role, text:message.text }));
     setChatMessages(items => [...items, { role:"user", text:clean }]);
     setChatInput("");
-    if (channel?.readyState === "open") {
-      sendTextOverChannel(channel, clean);
-      setVoiceStatus("Alan is thinking…");
-      return;
+    setIsSendingText(true);
+    setVoiceStatus("Alan is answering your typed question…");
+    try {
+      const response = await fetch("https://xryrekfeuknlqmidekww.supabase.co/functions/v1/alan-realtime-token", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({mode:"text", question:clean, history})
+      });
+      const payload = await response.json() as {text?:string;sources?:string[];error?:string};
+      if (!response.ok || !payload.text?.trim()) throw new Error(payload.error || "Alan could not answer the typed question");
+      setChatMessages(items => [...items, {role:"assistant", text:payload.text!.trim(), sources:payload.sources || ["Alan text session · approved Board evidence pack"]}]);
+      setVoiceStatus(isListening ? "Alan is listening — you can continue" : "Typed answer ready · voice remains optional");
+    } catch (error) {
+      setChatMessages(items => [...items, {role:"assistant", text:"I couldn’t complete that typed answer. Please try again in a moment; your question has not been lost or treated as a voice request."}]);
+      setVoiceStatus(error instanceof Error ? error.message : "Typed chat is temporarily unavailable");
+    } finally {
+      setIsSendingText(false);
     }
-    await startRealtime(false, clean);
   };
 
   const startRealtime = async (enableVoice: boolean, initialText?: string) => {
@@ -703,7 +716,7 @@ export default function Home() {
         <header><div><small>Alan · Virtual CFO</small><h2 id="strategy-chat-title">Ask Alan <em>(Virtual CFO)</em></h2><p>A natural, continuous conversation grounded in the approved Board evidence.</p><div className="grounded-badge"><i/>Realtime grounded mode · asks before assuming</div></div><div className="chat-head-actions"><button type="button" onClick={()=>{stopRealtimeVoice();setChatOpen(false)}} aria-label="Close Alan">×</button></div></header>
         <div className="conversation-control"><button type="button" className={isListening?"active":""} onClick={toggleListening}><i aria-hidden="true"/>{isListening?"End conversation":"Start conversation"}</button><span>{voiceStatus}</span></div>
         <div className="chat-thread" aria-live="polite">{chatMessages.map((message,index)=><article key={`${message.role}-${index}`} className={`${message.role}${message.view?" has-view":""}`}><small>{message.role==="assistant"?"Alan":"You"}</small>{message.view==="financial-changes"?<FinancialChangesView/>:<p>{message.text}</p>}{message.sources?.length?<div className="chat-sources"><b>Evidence</b>{message.sources.map(source=><span key={source}>{source}</span>)}</div>:null}</article>)}</div>
-        <form onSubmit={(event)=>{event.preventDefault();void sendRealtimeText()}}><label htmlFor="strategy-question">Ask Alan by typing or voice</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} onKeyDown={event=>{if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();void sendRealtimeText()}}} placeholder="Type your Board question here…" rows={2}/><button type="submit" disabled={!chatInput.trim()}>Send →</button></div><small>Press Enter to send; use Shift + Enter for a new line. Voice remains optional.</small></form>
+        <form onSubmit={(event)=>{event.preventDefault();void sendRealtimeText()}}><label htmlFor="strategy-question">Ask Alan by typing or voice</label><div><textarea id="strategy-question" value={chatInput} onChange={event=>setChatInput(event.target.value)} onKeyDown={event=>{if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();void sendRealtimeText()}}} placeholder="Type your Board question here…" rows={2}/><button type="submit" disabled={!chatInput.trim()||isSendingText}>{isSendingText?"Answering…":"Send →"}</button></div><small>Press Enter to send; use Shift + Enter for a new line. Typed questions work independently of voice.</small></form>
       </aside>
     </div>}
     <footer><span>Confidential · Board privileged</span><span>Prepared August 2026 · FY2026–29 growth strategy</span></footer>
