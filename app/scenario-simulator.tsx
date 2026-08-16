@@ -126,7 +126,7 @@ export default function ScenarioSimulator() {
 
       <footer className="simulator-method">
         <b>Calculation method</b>
-        <p>The approved full-group baseline is $3.835M TF+FA pre-synergy EBITDA + $1.650M synergies + $590k AI Digital EBITDA = $6.075M. TF EBITDA of $1.183M plus FA EBITDA of $3.604M is reconciled through a $952k consolidation/shared-cost adjustment to the approved $3.835M TF+FA result. FA revenue flexes with headcount and utilisation; FA gross-profit sensitivity uses the 30.2% margin. The UK control uses the documented $250k EBITDA exposure for each 20% plan miss. AI revenue and gross profit scale with adoption while the $575k below-GP allocation remains fixed. Realised synergies replace the approved $1.65M register proportionally.</p>
+        <p>The approved full-group baseline is $3.835M TF+FA pre-synergy EBITDA + $1.650M synergies + $590k AI Digital EBITDA = $6.075M. Updated TF EBITDA of $1.167M plus FA EBITDA of $3.604M is reconciled through a $937k consolidation/shared-cost adjustment to the approved $3.835M TF+FA result. FA revenue flexes with headcount and utilisation; FA gross-profit sensitivity uses the 30.2% margin. The UK control uses the documented $250k EBITDA exposure for each 20% plan miss. AI revenue and gross profit scale with adoption while the $575k below-GP allocation remains fixed. Realised synergies replace the approved $1.65M register proportionally.</p>
         <span>Model status: management sensitivity · approved case anchored · assumptions require Board validation</span>
       </footer>
     </div> : null}
